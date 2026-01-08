@@ -1,9 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "colpali-qdrant-baml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Vision-native document processing engine using ColPali, BAML, and Qdrant"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "baml-py==0.215.2",
+    "baml-py>=0.215.2",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["colpali_engine"]

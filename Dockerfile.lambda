@@ -4,11 +4,9 @@
 # Base stage - system dependencies
 FROM python:3.13-slim as base
 
-# Install system dependencies for document processing
+# Install minimal system dependencies for Lambda
 RUN apt-get update && apt-get install -y \
     poppler-utils \
-    wkhtmltopdf \
-    # Minimal dependencies only
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -25,49 +23,16 @@ FROM deps as models
 WORKDIR /models
 
 # Pre-download and optimize ColPali model during build
-RUN python << 'EOF'
-import os
-import torch
-from transformers import AutoModel, AutoProcessor
-
-try:
-    # Download ColPali model (adjust model name as needed)
-    print("Downloading ColPali model...")
-    model = AutoModel.from_pretrained('vidore/colqwen2-v0.1', trust_remote_code=True)
-    processor = AutoProcessor.from_pretrained('vidore/colqwen2-v0.1', trust_remote_code=True)
-
-    # Quantize model for memory efficiency
-    print("Quantizing model for Lambda...")
-    model_quantized = torch.quantization.quantize_dynamic(
-        model, {torch.nn.Linear}, dtype=torch.qint8
-    )
-
-    # Save optimized model
-    torch.save({
-        'model_state_dict': model_quantized.state_dict(),
-        'config': model.config
-    }, '/models/colpali_quantized.pth')
-
-    processor.save_pretrained('/models/processor')
-    print("Model preparation complete")
-
-except Exception as e:
-    print(f"Model download failed: {e}")
-    # Create placeholder files for build to continue
-    os.makedirs('/models/processor', exist_ok=True)
-    with open('/models/colpali_quantized.pth', 'w') as f:
-        f.write('placeholder')
-EOF
+COPY prepare_lambda_model.py /tmp/prepare_lambda_model.py
+RUN python3 /tmp/prepare_lambda_model.py
 
 # Final Lambda image
 FROM public.ecr.aws/lambda/python:3.13 as lambda-final
 
-# Copy system dependencies
+# Copy system dependencies (poppler-utils for PDF processing)
 COPY --from=base /usr/bin/pdftoppm /usr/bin/
 COPY --from=base /usr/bin/pdftops /usr/bin/
-COPY --from=base /usr/bin/wkhtmltopdf /usr/bin/
-COPY --from=base /usr/lib/x86_64-linux-gnu/libpoppler* /usr/lib/x86_64-linux-gnu/
-COPY --from=base /usr/lib/x86_64-linux-gnu/libwoff* /usr/lib/x86_64-linux-gnu/
+COPY --from=base /usr/lib/aarch64-linux-gnu/libpoppler* /usr/lib/aarch64-linux-gnu/
 
 # Copy Python dependencies
 COPY --from=deps /lambda-deps ${LAMBDA_TASK_ROOT}
