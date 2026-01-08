@@ -25,14 +25,17 @@ This document establishes the development workflow and rules for the ColPali-BAM
    - Test all functionality thoroughly before considering story complete
 
 4. **Pre-Merge Requirements**
-   - Before merging any story branch, update the README file with:
-     - Detailed explanation of what was implemented
-     - How to use the new functionality
-     - Any configuration changes or setup requirements
-     - Updated installation/deployment instructions
-   - Ensure all tests pass
-   - Verify Docker builds work correctly
-   - Validate all story acceptance criteria
+   - Before merging any story branch:
+     - Update the JIRA implementation plan's "Definition of Done" section for the completed story
+     - Mark all tasks as completed with ✅ checkmarks
+     - Update the README file with:
+       - Detailed explanation of what was implemented
+       - How to use the new functionality
+       - Any configuration changes or setup requirements
+       - Updated installation/deployment instructions
+     - Ensure all tests pass
+     - Verify Docker builds work correctly
+     - Validate all story acceptance criteria
 
 5. **Merge and Iteration Process**
    - Once story is complete and README updated, merge to `main`
