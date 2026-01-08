@@ -63,6 +63,14 @@ class BAMLDefinition:
     version: str = "0.215.2"
 
 
+@dataclass
+class ValidationResult:
+    """Result of schema validation."""
+    is_valid: bool
+    issues: List[str]
+    warnings: List[str]
+
+
 class SchemaManager:
     """
     Manages conversion of JSON schemas to BAML definitions.
@@ -423,14 +431,6 @@ Return the extracted data in the specified format:
             prompt_template=baml_function.prompt_template,
             description=baml_function.description
         )
-
-
-@dataclass
-class ValidationResult:
-    """Result of schema validation."""
-    is_valid: bool
-    issues: List[str]
-    warnings: List[str]
 
 
 # Custom exceptions
