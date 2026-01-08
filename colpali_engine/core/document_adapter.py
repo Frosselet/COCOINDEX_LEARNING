@@ -269,40 +269,108 @@ class DocumentAdapter:
             raise MetadataExtractionError(f"Failed to extract metadata: {e}")
 
     async def _detect_format(self, content: bytes) -> DocumentFormat:
-        """Detect document format from content."""
-        # TODO: Implement robust format detection
-        # This could use python-magic, file signatures, or header analysis
+        """
+        Detect document format from content using MIME type detection.
 
-        # Simple heuristics for now (to be improved in COLPALI-203)
+        Uses python-magic for robust MIME type detection with fallback
+        to signature-based detection for reliability.
+        """
+        # Try MIME type detection first
+        try:
+            import magic
+            mime_type = magic.from_buffer(content, mime=True)
+
+            if mime_type in self._mime_type_mapping:
+                logger.debug(f"Detected format via MIME type: {mime_type}")
+                return self._mime_type_mapping[mime_type]
+
+            logger.debug(f"Unknown MIME type: {mime_type}, falling back to signature detection")
+        except ImportError:
+            logger.debug("python-magic not available, using signature detection")
+        except Exception as e:
+            logger.debug(f"MIME detection failed: {e}, using signature detection")
+
+        # Fallback to file signature detection
+        return self._detect_by_signature(content)
+
+    def _detect_by_signature(self, content: bytes) -> DocumentFormat:
+        """Detect format using file signatures (magic numbers)."""
+        # PDF format
         if content.startswith(b"%PDF"):
             return DocumentFormat.PDF
-        elif content.startswith(b"PK"):  # ZIP-based formats (Office)
-            # Additional checks needed to distinguish Excel/PowerPoint/Word
-            return DocumentFormat.EXCEL  # Default assumption
-        elif content.startswith(b"<!DOCTYPE html") or content.startswith(b"<html"):
+
+        # ZIP-based formats (Office documents)
+        elif content.startswith(b"PK"):
+            # Look for Office format indicators within ZIP structure
+            content_str = content[:2048].decode('latin-1', errors='ignore')
+
+            if any(indicator in content_str for indicator in ['xl/', 'worksheets/', 'sharedStrings']):
+                return DocumentFormat.EXCEL
+            elif any(indicator in content_str for indicator in ['ppt/', 'slides/', 'presentation']):
+                return DocumentFormat.POWERPOINT
+            elif any(indicator in content_str for indicator in ['word/', 'document.xml']):
+                return DocumentFormat.WORD
+            else:
+                # Default to Excel for unknown ZIP formats
+                return DocumentFormat.EXCEL
+
+        # HTML format
+        elif (content.startswith(b"<!DOCTYPE html") or
+              content.startswith(b"<html") or
+              content.startswith(b"<HTML")):
             return DocumentFormat.HTML
+
+        # Image formats
         elif content.startswith(b"\xff\xd8\xff"):  # JPEG
             return DocumentFormat.IMAGE
-        elif content.startswith(b"\x89PNG"):  # PNG
+        elif content.startswith(b"\x89PNG\r\n\x1a\n"):  # PNG
             return DocumentFormat.IMAGE
+        elif content.startswith(b"GIF87a") or content.startswith(b"GIF89a"):  # GIF
+            return DocumentFormat.IMAGE
+        elif content.startswith(b"II*\x00") or content.startswith(b"MM\x00*"):  # TIFF
+            return DocumentFormat.IMAGE
+        elif content.startswith(b"BM"):  # BMP
+            return DocumentFormat.IMAGE
+        elif content.startswith(b"RIFF") and b"WEBP" in content[:12]:  # WebP
+            return DocumentFormat.IMAGE
+
+        # RTF format (Rich Text Format)
+        elif content.startswith(b"{\\rtf"):
+            return DocumentFormat.WORD  # Treat RTF as Word-compatible
+
+        # Legacy Office formats
+        elif content.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):  # OLE2/CFB
+            # This is a legacy Office format, need to check subtype
+            return DocumentFormat.EXCEL  # Default assumption
+
         else:
-            raise UnsupportedFormatError("Unable to detect document format")
+            raise UnsupportedFormatError(
+                f"Unable to detect document format from signature: {content[:16].hex()}"
+            )
 
     def _detect_format_sync(self, content: bytes) -> DocumentFormat:
-        """Synchronous format detection."""
-        # Same logic as async version for now
-        if content.startswith(b"%PDF"):
-            return DocumentFormat.PDF
-        elif content.startswith(b"PK"):
-            return DocumentFormat.EXCEL
-        elif content.startswith(b"<!DOCTYPE html") or content.startswith(b"<html"):
-            return DocumentFormat.HTML
-        elif content.startswith(b"\xff\xd8\xff"):
-            return DocumentFormat.IMAGE
-        elif content.startswith(b"\x89PNG"):
-            return DocumentFormat.IMAGE
-        else:
-            raise UnsupportedFormatError("Unable to detect document format")
+        """
+        Synchronous format detection using MIME type detection.
+
+        Same logic as async version but without async/await.
+        """
+        # Try MIME type detection first
+        try:
+            import magic
+            mime_type = magic.from_buffer(content, mime=True)
+
+            if mime_type in self._mime_type_mapping:
+                logger.debug(f"Detected format via MIME type: {mime_type}")
+                return self._mime_type_mapping[mime_type]
+
+            logger.debug(f"Unknown MIME type: {mime_type}, falling back to signature detection")
+        except ImportError:
+            logger.debug("python-magic not available, using signature detection")
+        except Exception as e:
+            logger.debug(f"MIME detection failed: {e}, using signature detection")
+
+        # Fallback to file signature detection
+        return self._detect_by_signature(content)
 
     def _get_adapter(self, format_type: DocumentFormat) -> BaseDocumentAdapter:
         """Get adapter for the specified format."""

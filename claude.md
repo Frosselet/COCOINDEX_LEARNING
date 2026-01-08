@@ -44,9 +44,10 @@ This document establishes the development workflow and rules for the ColPali-BAM
 
 ### Current Status Tracking
 
-- **Active Story**: COLPALI-100 (Core Infrastructure & Docker Foundation)
-- **Current Branch**: `main` (initial setup)
-- **Next Branch**: `feature/COLPALI-100-core-infrastructure`
+- **Completed Stories**: COLPALI-100 (Core Infrastructure & Docker Foundation) ✅
+- **Active Story**: COLPALI-200 (Document Processing Pipeline)
+- **Current Branch**: `feature/COLPALI-200-document-processing-pipeline`
+- **Next**: Implement document-to-image conversion pipeline
 
 ### Story Progress Tracking
 
@@ -63,6 +64,19 @@ Use the TodoWrite tool to maintain visibility into:
 - Code must follow established architectural patterns
 - Documentation must be complete and accurate
 - Memory and performance requirements must be met
+
+### Development Integrity Requirements
+
+**CRITICAL**: No shortcuts or simplifications when facing technical challenges.
+
+- **Full Implementation**: Every feature must be implemented exactly as specified in the JIRA plan
+- **Systematic Problem Solving**: Address dependency issues, import problems, and technical challenges head-on
+- **Plan Updates**: If changes are truly necessary, explicitly update the JIRA plan and ADR with clear reasoning
+- **Test Organization**: All tests must be properly organized in structured folders with clear naming
+- **Consistency**: Maintain full consistency between documentation, implementation, and testing
+- **No Workarounds**: Avoid temporary solutions or simplified implementations that deviate from the plan
+
+*When encountering technical difficulties, the solution is better implementation, not easier requirements.*
 
 ---
 
