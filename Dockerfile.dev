@@ -1,0 +1,63 @@
+# Development Dockerfile for ColPali-BAML Engine
+# Optimized for development with hot-reload and debugging capabilities
+
+FROM python:3.13-slim AS base
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    # Document processing dependencies
+    poppler-utils \
+    # Build dependencies
+    build-essential \
+    curl \
+    git \
+    # Debugging and development tools
+    vim \
+    htop \
+    tree \
+    # Clean up
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user for development
+RUN useradd --create-home --shell /bin/bash dev
+
+# Set up Python environment as root first
+ENV PATH="/home/dev/.local/bin:$PATH"
+
+# Copy and install Python dependencies as root
+COPY requirements/ requirements/
+RUN chown -R dev:dev requirements/
+
+# Switch to dev user and install dependencies
+USER dev
+WORKDIR /home/dev
+RUN pip install --user --no-cache-dir -r /requirements/dev.txt
+
+# Create application directory structure
+WORKDIR /app
+USER root
+RUN chown -R dev:dev /app
+USER dev
+
+# Copy source code (in development, this will be mounted as volume)
+COPY --chown=dev:dev . .
+
+# Install package in development mode
+RUN pip install --user -e .
+
+# Expose ports for development servers
+EXPOSE 8000 8888 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Default command for development
+CMD ["python", "-m", "uvicorn", "colpali_engine.api:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

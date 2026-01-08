@@ -1,0 +1,35 @@
+# Core production dependencies for ColPali-BAML Engine
+# Vision & ML
+torch>=2.1.0
+torchvision>=0.16.0
+transformers>=4.36.0
+colpali-engine>=0.3.0
+Pillow>=10.0.0
+
+# Document Processing
+pdf2image>=1.16.0
+python-pptx>=0.6.23
+openpyxl>=3.1.0
+
+# Vector Storage & Orchestration
+qdrant-client>=1.7.0
+cocoindex>=0.3.0
+
+# Type Safety & Extraction
+baml-py>=0.215.2
+pydantic>=2.5.0
+
+# Output Formats
+pandas>=2.1.0
+pyarrow>=14.0.0
+
+# HTTP Client
+httpx>=0.25.0
+aiohttp>=3.8.0
+
+# Configuration
+python-decouple>=3.8
+pydantic-settings>=2.0.0
+
+# Logging
+structlog>=23.2.0

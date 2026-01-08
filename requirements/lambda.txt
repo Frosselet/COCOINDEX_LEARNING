@@ -1,0 +1,43 @@
+# Lambda-optimized dependencies (size and cold start optimized)
+# CPU-optimized PyTorch
+torch==2.1.0+cpu --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+torchvision==0.16.0+cpu --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+
+# Core Vision & ML (minimal versions)
+transformers==4.36.0
+Pillow==10.0.0
+
+# ColPali (will need to verify availability for Lambda)
+colpali-engine>=0.3.0
+
+# Document Processing
+pdf2image==3.1.0
+
+# Vector Storage
+qdrant-client==1.7.0
+
+# Orchestration (minimal)
+cocoindex==0.3.0
+
+# Type Safety
+baml-py==0.215.2
+pydantic==2.5.0
+
+# Output (minimal)
+pandas==2.1.0
+pyarrow==14.0.0
+
+# HTTP (lightweight)
+httpx==0.25.0
+
+# Configuration (minimal)
+python-decouple==3.8
+
+# Logging (structured)
+structlog==23.2.0
+
+# AWS Lambda Runtime Interface
+awslambdaric==2.0.7
+
+# Memory optimization
+psutil==5.9.0

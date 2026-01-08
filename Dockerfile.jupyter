@@ -1,0 +1,145 @@
+# Jupyter Dockerfile for ColPali-BAML Engine
+# Optimized for interactive analysis and visualization
+
+FROM python:3.13-slim as base
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    # Document processing
+    poppler-utils \
+    wkhtmltopdf \
+    libreoffice-headless \
+    # Development tools
+    git \
+    curl \
+    vim \
+    # Graphics and visualization dependencies
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    # Clean up
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create jupyter user
+RUN useradd --create-home --shell /bin/bash jupyter
+USER jupyter
+WORKDIR /home/jupyter
+
+# Set up Python environment
+ENV PATH="/home/jupyter/.local/bin:$PATH"
+
+# Install Jupyter and visualization dependencies
+COPY requirements/jupyter.txt requirements/
+RUN pip install --user --no-cache-dir -r requirements/jupyter.txt
+
+# Configure Jupyter
+RUN jupyter lab --generate-config && \
+    echo "c.ServerApp.ip = '0.0.0.0'" >> /home/jupyter/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.open_browser = False" >> /home/jupyter/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.token = ''" >> /home/jupyter/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.password = ''" >> /home/jupyter/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_root = True" >> /home/jupyter/.jupyter/jupyter_lab_config.py
+
+# Create notebook directories
+RUN mkdir -p /home/jupyter/notebooks && \
+    mkdir -p /home/jupyter/data && \
+    mkdir -p /home/jupyter/models
+
+# Set working directory
+WORKDIR /home/jupyter/notebooks
+
+# Create initial example notebook
+RUN cat > /home/jupyter/notebooks/ColPali_Quick_Start.ipynb << 'EOF'
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# ColPali-BAML Engine Quick Start\n",
+    "\n",
+    "This notebook demonstrates the vision-based document processing pipeline."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "source": [
+    "import sys\n",
+    "sys.path.append('/app')\n",
+    "\n",
+    "from colpali_engine.core.pipeline import VisionExtractionPipeline\n",
+    "from colpali_engine.vision.colpali_client import ColPaliClient\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "print('ColPali-BAML Engine loaded successfully!')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Load Sample PDF\n",
+    "\n",
+    "Load one of the test PDFs from the `/app/test_data` directory."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "source": [
+    "# List available test PDFs\n",
+    "import os\n",
+    "pdf_dir = '/app/test_data'\n",
+    "if os.path.exists(pdf_dir):\n",
+    "    pdfs = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]\n",
+    "    print(f'Available test PDFs: {len(pdfs)}')\n",
+    "    for pdf in pdfs[:5]:  # Show first 5\n",
+    "        print(f'  - {pdf}')\n",
+    "else:\n",
+    "    print('Test data directory not found - mount /app/test_data volume')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
+EOF
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8888/lab || exit 1
+
+# Start Jupyter Lab
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
