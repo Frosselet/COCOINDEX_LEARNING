@@ -560,11 +560,14 @@ pyarrow>=14.0.0
 ---
 
 ### Story 4: COLPALI-400 - Qdrant Vector Storage
-**Points**: 13
+**Points**: 16 (Originally 13, expanded with COLPALI-404)
 **Sprint**: 5-6
-**Priority**: Medium
+**Priority**: Medium - **COMPLETED** ✅
 
-**Description**: Implement vector database operations using Qdrant for storing and querying ColPali embeddings with spatial metadata. This enables efficient semantic search and retrieval of document patches containing tables and structured data.
+> **📋 Status Update**: Complete Qdrant vector storage integration is **COMPLETED** and production-ready.
+> All four sub-tasks successfully implemented with comprehensive testing and validation.
+
+**Description**: Implement vector database operations using Qdrant for storing and querying ColPali embeddings with spatial metadata. This enables efficient semantic search and retrieval of document patches containing tables and structured data. Extended to include comprehensive performance monitoring and optimization capabilities.
 
 **Acceptance Criteria**:
 - ✅ Qdrant collections configured for multi-vector storage
@@ -572,6 +575,7 @@ pyarrow>=14.0.0
 - ✅ Semantic search functionality with similarity thresholds
 - ✅ Collection management and optimization
 - ✅ Performance tuning for large document collections
+- ✅ Performance monitoring and benchmarking capabilities
 
 #### Tasks:
 
@@ -597,10 +601,10 @@ pyarrow>=14.0.0
 - Health check endpoints
 
 **Definition of Done**:
-- [ ] Qdrant client implemented
-- [ ] Collection schemas created
-- [ ] Connection management working
-- [ ] Health monitoring active
+- [x] Qdrant client implemented ✅
+- [x] Collection schemas created ✅
+- [x] Connection management working ✅
+- [x] Health monitoring active ✅
 
 ---
 
@@ -626,10 +630,10 @@ pyarrow>=14.0.0
 - Compression strategies
 
 **Definition of Done**:
-- [ ] Multi-vector storage implemented
-- [ ] Batch operations working
-- [ ] Metadata indexing active
-- [ ] Performance validated
+- [x] Multi-vector storage implemented ✅
+- [x] Batch operations working ✅
+- [x] Metadata indexing active ✅
+- [x] Performance validated ✅
 
 ---
 
@@ -655,10 +659,39 @@ pyarrow>=14.0.0
 - Result deduplication logic
 
 **Definition of Done**:
-- [ ] Search engine implemented
-- [ ] Ranking algorithms working
-- [ ] Performance optimized
-- [ ] Caching active
+- [x] Search engine implemented ✅
+- [x] Ranking algorithms working ✅
+- [x] Performance optimized ✅
+- [x] Caching active ✅
+
+---
+
+#### COLPALI-404: Performance optimization and monitoring [3 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 6
+**Dependencies**: COLPALI-401, COLPALI-402, COLPALI-403
+
+**Description**: Implement comprehensive performance monitoring, optimization, and benchmarking capabilities for the Qdrant vector storage system. Includes metrics collection, search performance benchmarking, and intelligent optimization recommendations.
+
+**Acceptance Criteria**:
+- Performance metrics collection and reporting
+- Search benchmarking with statistical analysis
+- Collection optimization and HNSW tuning
+- System health monitoring and alerts
+- Intelligent optimization recommendations
+
+**Technical Implementation**:
+- Performance metrics collection (storage, indexing, search)
+- Search benchmarking with configurable iterations
+- Collection optimization triggers
+- Health monitoring with connectivity checks
+- Recommendation engine based on usage patterns
+
+**Definition of Done**:
+- [x] Performance metrics implemented ✅
+- [x] Search benchmarking working ✅
+- [x] Collection optimization active ✅
+- [x] Health monitoring complete ✅
 
 ---
 
