@@ -44,10 +44,14 @@ This document establishes the development workflow and rules for the ColPali-BAM
 
 ### Current Status Tracking
 
-- **Completed Stories**: COLPALI-100 (Core Infrastructure & Docker Foundation) ✅
-- **Active Story**: COLPALI-200 (Document Processing Pipeline)
-- **Current Branch**: `feature/COLPALI-200-document-processing-pipeline`
-- **Next**: Implement document-to-image conversion pipeline
+- **Completed Stories**:
+  - COLPALI-100 (Core Infrastructure & Docker Foundation) ✅
+  - COLPALI-200 (Document Processing Pipeline) ✅
+  - COLPALI-300 (ColPali Vision Integration) ✅
+  - COLPALI-400 (Qdrant Vector Storage Integration) ✅
+- **Active Story**: COLPALI-500 (BAML Schema System Integration)
+- **Current Branch**: `main` (ready for next feature branch)
+- **Next**: Implement dynamic schema system with JSON-to-BAML conversion engine
 
 ### Story Progress Tracking
 
@@ -64,6 +68,27 @@ Use the TodoWrite tool to maintain visibility into:
 - Code must follow established architectural patterns
 - Documentation must be complete and accurate
 - Memory and performance requirements must be met
+
+### Git Workflow Validation
+
+**CRITICAL**: Before starting any new story, validate the git workflow:
+
+1. **Pre-Development Checklist**:
+   - ✅ Confirm you are on `main` branch
+   - ✅ Create feature branch: `feature/COLPALI-XXX-short-description`
+   - ✅ NEVER commit directly to `main` branch
+   - ✅ Reference JIRA ticket number in all commits
+
+2. **Pre-Merge Validation**:
+   - ✅ All commits are on feature branch, not main
+   - ✅ Git log shows proper branch/merge structure
+   - ✅ All acceptance criteria completed on feature branch
+   - ✅ Create proper merge commit with detailed message
+
+3. **Post-Merge Cleanup**:
+   - ✅ Delete feature branch after successful merge
+   - ✅ Push updated main branch to origin
+   - ✅ Verify git graph shows clean branch/merge pattern
 
 ### Development Integrity Requirements
 
