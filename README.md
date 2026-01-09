@@ -179,14 +179,18 @@ ColPali-BAML Engine
 ### Environment Variables
 
 ```bash
-# Model caching (for Lambda)
+# Model caching (for Lambda deployment)
 export TRANSFORMERS_CACHE=/mnt/efs/transformers_cache
 export HF_HOME=/mnt/efs/hf_cache
 export TORCH_HOME=/mnt/efs/torch_cache
 
-# Qdrant connection
+# Qdrant connection (local development)
 export QDRANT_URL=http://localhost:6333
-export QDRANT_API_KEY=your-api-key
+# Note: No API key needed for local Qdrant instance
+
+# Qdrant connection (production/cloud)
+# export QDRANT_URL=https://your-cluster.qdrant.io
+# export QDRANT_API_KEY=your-api-key
 ```
 
 ### Memory Optimization

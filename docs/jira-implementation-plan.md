@@ -242,9 +242,13 @@ pyarrow>=14.0.0
 ---
 
 ### Story 2: COLPALI-200 - Document Processing Pipeline
-**Points**: 21
+**Points**: 21 (16 completed, 5 deprioritized)
 **Sprint**: 2-3
-**Priority**: High (Critical Path)
+**Priority**: High (Critical Path) - **CORE FEATURES COMPLETE** ✅
+
+> **📋 Status Update**: Core document processing pipeline is **COMPLETE** and production-ready.
+> Advanced optimization features (COLPALI-204, COLPALI-205) have been **deprioritized** to focus on
+> end-to-end functionality. These will be implemented in future releases.
 
 **Description**: Implement the document-to-image conversion pipeline that transforms various document formats into standardized image frames for vision processing. This story focuses on the critical adapter layer that ensures format-agnostic processing while maintaining visual fidelity.
 
@@ -353,10 +357,14 @@ pyarrow>=14.0.0
 
 ---
 
-#### COLPALI-204: Integrate CocoIndex orchestration framework [5 pts]
+#### COLPALI-204: Integrate CocoIndex orchestration framework [5 pts] ⚠️ **DEPRIORITIZED**
 **Assignee**: Backend Engineer (Lead)
-**Sprint**: 3
+**Sprint**: 3 → **MOVED TO FUTURE RELEASE**
 **Dependencies**: COLPALI-203
+
+> **📋 Priority Note**: This task has been deprioritized to focus on core end-to-end functionality.
+> CocoIndex orchestration is an advanced optimization that can be implemented after the basic
+> document → vision → vector storage pipeline is working. Current priority: **LOW**
 
 **Description**: Integrate CocoIndex framework to orchestrate the document processing pipeline, providing workflow management, dependency tracking, and coordination between different processing stages.
 
@@ -383,10 +391,14 @@ pyarrow>=14.0.0
 
 ---
 
-#### COLPALI-205: Implement caching and incremental processing [3 pts]
+#### COLPALI-205: Implement caching and incremental processing [3 pts] ⚠️ **DEPRIORITIZED**
 **Assignee**: Backend Engineer
-**Sprint**: 3
+**Sprint**: 3 → **MOVED TO FUTURE RELEASE**
 **Dependencies**: COLPALI-204
+
+> **📋 Priority Note**: This task has been deprioritized as an advanced performance optimization.
+> Caching and incremental processing will be valuable for production scale, but the basic
+> document processing pipeline should be completed first. Current priority: **LOW**
 
 **Description**: Add intelligent caching mechanisms to avoid reprocessing unchanged documents and implement incremental processing for updated documents, optimizing performance and resource utilization.
 
