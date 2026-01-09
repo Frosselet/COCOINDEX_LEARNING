@@ -34,3 +34,6 @@ pydantic-settings>=2.0.0
 
 # Logging
 structlog>=23.2.0
+
+# System Monitoring
+psutil>=5.9.0
