@@ -84,6 +84,7 @@ class SchemaManager:
         self.baml_templates = self._initialize_templates()
         self.type_mapping = self._initialize_type_mapping()
         self.generated_definitions: Dict[str, BAMLDefinition] = {}
+        self.class_registry: Dict[str, BAMLClass] = {}  # Track generated classes to avoid duplicates
 
         logger.info("SchemaManager initialized")
 
@@ -104,6 +105,9 @@ class SchemaManager:
         try:
             # Validate input schema
             self._validate_json_schema(schema_json)
+
+            # Clear class registry for new conversion
+            self.class_registry = {}
 
             # Extract schema information
             schema_name = schema_json.get("title", "ExtractedData")
@@ -134,6 +138,9 @@ class SchemaManager:
             logger.info(f"Successfully generated BAML definition for '{schema_name}'")
             return definition
 
+        except ValidationError:
+            # Re-raise validation errors as-is
+            raise
         except Exception as e:
             logger.error(f"BAML generation failed: {e}")
             raise SchemaConversionError(f"Failed to convert schema: {e}")
@@ -258,13 +265,28 @@ function {{ name }}({{ input_params | join(', ') }}) -> {{ return_type }} {
             "object": "object"
         }
 
-    def _validate_json_schema(self, schema: Dict) -> None:
+    def _validate_json_schema(self, schema: Any) -> None:
         """Validate JSON schema structure."""
         if not isinstance(schema, dict):
             raise ValidationError("Schema must be a dictionary")
 
         if "properties" not in schema:
             raise ValidationError("Schema must have 'properties' field")
+
+        # Validate properties structure
+        properties = schema.get("properties", {})
+        if not isinstance(properties, dict):
+            raise ValidationError("Schema 'properties' field must be a dictionary")
+
+        # Validate each property has a valid type
+        for prop_name, prop_def in properties.items():
+            if not isinstance(prop_def, dict):
+                raise ValidationError(f"Property '{prop_name}' definition must be a dictionary")
+
+            prop_type = prop_def.get("type")
+            if prop_type and prop_type not in self.type_mapping:
+                # Allow this to pass validation but log as warning
+                logger.warning(f"Property '{prop_name}' has unsupported type '{prop_type}', will default to string")
 
         # Additional validation can be added here
         pass
@@ -288,18 +310,33 @@ function {{ name }}({{ input_params | join(', ') }}) -> {{ return_type }} {
             if prop_type == "object":
                 nested_properties = prop_def.get("properties", {})
                 nested_required = prop_def.get("required", [])
-                nested_class_name = f"{prop_name.title()}"
+                nested_class_name = self._format_class_name(prop_name)
 
-                # Create nested class
-                nested_class = self._convert_properties_to_classes(
-                    nested_class_name,
-                    nested_properties,
-                    nested_required
-                )[0]
-                classes.append(nested_class)
+                # Check if this class structure already exists
+                class_key = self._generate_class_key(nested_class_name, nested_properties)
 
-                # Reference nested class in main class
-                field_type = nested_class_name
+                if class_key in self.class_registry:
+                    # Reuse existing class
+                    field_type = self.class_registry[class_key].name
+                    logger.debug(f"Reusing existing class '{field_type}' for property '{prop_name}'")
+                else:
+                    # Create new nested classes recursively
+                    nested_classes = self._convert_properties_to_classes(
+                        nested_class_name,
+                        nested_properties,
+                        nested_required
+                    )
+
+                    # Register the main nested class
+                    if nested_classes:
+                        self.class_registry[class_key] = nested_classes[0]
+
+                    # Add ALL nested classes (main + any deeply nested ones)
+                    classes.extend(nested_classes)
+
+                    field_type = nested_class_name
+
+                # Reference the nested class in the current class
                 main_fields.append(BAMLField(
                     name=prop_name,
                     field_type=field_type,
@@ -314,18 +351,32 @@ function {{ name }}({{ input_params | join(', ') }}) -> {{ return_type }} {
 
                 if items_type == "object":
                     # Array of objects
-                    item_class_name = f"{prop_name.title()}Item"
+                    item_class_name = f"{self._format_class_name(prop_name)}Item"
                     item_properties = items_def.get("properties", {})
                     item_required = items_def.get("required", [])
 
-                    item_class = self._convert_properties_to_classes(
-                        item_class_name,
-                        item_properties,
-                        item_required
-                    )[0]
-                    classes.append(item_class)
+                    # Check if this item class structure already exists
+                    item_class_key = self._generate_class_key(item_class_name, item_properties)
 
-                    field_type = f"{item_class_name}[]"
+                    if item_class_key in self.class_registry:
+                        # Reuse existing item class
+                        field_type = f"{self.class_registry[item_class_key].name}[]"
+                    else:
+                        # Create item classes recursively
+                        item_classes = self._convert_properties_to_classes(
+                            item_class_name,
+                            item_properties,
+                            item_required
+                        )
+
+                        # Register the main item class
+                        if item_classes:
+                            self.class_registry[item_class_key] = item_classes[0]
+
+                        # Add ALL item classes (main + any nested ones)
+                        classes.extend(item_classes)
+
+                        field_type = f"{item_class_name}[]"
                 else:
                     # Array of primitives
                     baml_type = self.type_mapping.get(items_type, "string")
@@ -355,7 +406,25 @@ function {{ name }}({{ input_params | join(', ') }}) -> {{ return_type }} {
             description=f"Generated from JSON schema for {class_name}"
         )
 
+        # Return main class first, then all nested classes
         return [main_class] + classes
+
+    def _generate_class_key(self, class_name: str, properties: Dict) -> str:
+        """Generate a unique key for a class based on its structure."""
+        # Create a signature based on property names and types
+        prop_sig = []
+        for prop_name, prop_def in sorted(properties.items()):
+            prop_type = prop_def.get("type", "string")
+            prop_sig.append(f"{prop_name}:{prop_type}")
+
+        return f"{class_name}|{','.join(prop_sig)}"
+
+    def _format_class_name(self, prop_name: str) -> str:
+        """Format property name to valid class name."""
+        # Convert snake_case or kebab-case to PascalCase
+        # Examples: line_items -> LineItems, table_data -> TableData
+        parts = prop_name.replace('-', '_').split('_')
+        return ''.join(part.capitalize() for part in parts)
 
     def _generate_extraction_functions(
         self,
@@ -388,7 +457,7 @@ function {{ name }}({{ input_params | join(', ') }}) -> {{ return_type }} {
                 desc += f": {field.description}"
             field_descriptions.append(desc)
 
-        prompt = f"""{{ _.role("user") }}
+        prompt = f"""{{{{ _.role("user") }}}}
 Extract structured data from these document images with high precision.
 
 Target fields:
