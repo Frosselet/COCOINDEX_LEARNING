@@ -6,12 +6,18 @@ for structured data extraction from document images.
 """
 
 from .models import ExtractionResult, CanonicalData, ShapedData, ProcessingMetadata
-from .baml_interface import BAMLInterface
+from .baml_interface import BAMLExecutionInterface
+from .validation import ExtractionResultValidator
+from .error_handling import ErrorHandler
+from .quality_metrics import ExtractionQualityManager
 
 __all__ = [
     "ExtractionResult",
     "CanonicalData",
     "ShapedData",
     "ProcessingMetadata",
-    "BAMLInterface",
+    "BAMLExecutionInterface",
+    "ExtractionResultValidator",
+    "ErrorHandler",
+    "ExtractionQualityManager",
 ]
