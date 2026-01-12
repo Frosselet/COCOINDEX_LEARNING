@@ -16,7 +16,7 @@ from datetime import datetime
 from ..extraction.models import ExtractionResult, CanonicalData, ShapedData, ProcessingMetadata
 from ..vision.colpali_client import ColPaliClient
 from ..storage.qdrant_client import QdrantManager
-from ..extraction.baml_interface import BAMLInterface
+from ..extraction.baml_interface import BAMLExecutionInterface
 from ..outputs.canonical import CanonicalFormatter
 from ..outputs.shaped import ShapedFormatter
 
@@ -60,7 +60,7 @@ class VisionExtractionPipeline:
         self,
         colpali_client: ColPaliClient,
         qdrant_manager: QdrantManager,
-        baml_interface: BAMLInterface,
+        baml_interface: BAMLExecutionInterface,
         canonical_formatter: CanonicalFormatter,
         shaped_formatter: Optional[ShapedFormatter] = None,
         config: Optional[PipelineConfig] = None
