@@ -1478,9 +1478,286 @@ await streaming_exporter.stream_to_parquet(
 
 ---
 
-### 🔄 Next Story: COLPALI-800 - Governance & Lineage
+### ✅ Story 8: COLPALI-800 - Governance & Lineage (COMPLETED)
 
-**Ready to Implement**: Complete transformation lineage tracking and governance validation rules
-**Dependencies**: Dual-output architecture provides foundation for governance framework ✅
+**Status**: Production-ready governance framework with complete lineage tracking and validation rules ✅
+**Implementation**: Comprehensive transformation lineage tracking and multi-layered governance validation system
 
-*Dual-output architecture production-ready with canonical truth preservation, 1NF enforcement, and comprehensive export capabilities.*
+#### 🚀 What's New in COLPALI-800
+
+**Enterprise-grade governance framework** implementing complete transformation lineage tracking from source to export, with multi-layered validation rules ensuring data integrity and compliance across the entire processing pipeline:
+
+#### ✅ COLPALI-801: Transformation Lineage Tracking (5 pts)
+- **Complete Lineage Graph**: Directed acyclic graph (DAG) tracking all transformations
+  - **Source Document**: Original file tracking with SHA-256 hash
+  - **Document Conversion**: Format conversions (PDF→Images)
+  - **ColPali Embedding**: Vision embedding generation with model metadata
+  - **Qdrant Storage**: Vector database storage with collection tracking
+  - **BAML Extraction**: Structured data extraction with schema validation
+  - **Canonical Format**: Truth layer creation with integrity hashing
+  - **Shaped Transform**: 1NF transformations with rule tracking
+  - **Export Output**: Final export with format and compression metadata
+- **LineageNode System**: Rich node metadata with performance tracking
+  - Node types for each processing stage
+  - Parent-child relationship tracking
+  - Operation metadata and parameters
+  - Performance metrics (duration, memory, throughput)
+  - Timestamp tracking for audit trails
+- **LineageGraph Operations**:
+  - Path finding between any two nodes
+  - Ancestor/descendant queries
+  - Source and sink node identification
+  - Full graph serialization/deserialization
+- **LineageTracker API**: High-level tracking interface
+  - Easy recording for each pipeline stage
+  - Automatic relationship management
+  - Complete lineage retrieval
+  - Performance metrics aggregation
+- **LineageQuery System**: Advanced querying capabilities
+  - Find nodes by type or operation
+  - Calculate processing times
+  - Extract transformation chains
+  - Generate performance summaries
+- **34 Comprehensive Tests**: Full coverage of all lineage operations
+
+#### ✅ COLPALI-802: Governance Validation Rules (3 pts)
+- **GovernanceValidator Engine**: Multi-category validation framework
+  - **Canonical Integrity Rules**:
+    - Non-null data validation (CRITICAL severity)
+    - Integrity hash validation (ERROR severity)
+    - Timestamp validity checks (WARNING severity)
+  - **Transformation Approval Rules**:
+    - Transformation rule authorization
+    - 1NF compliance enforcement (CRITICAL severity)
+    - Approval workflow system
+  - **Data Distortion Rules**:
+    - Field count preservation warnings
+    - Data type consistency validation
+    - Value transformation monitoring
+  - **Compliance Rules**:
+    - Metadata preservation validation
+    - Processing ID consistency checks
+    - Audit trail completeness
+- **ValidationRule System**: Flexible rule definition framework
+  - Rule categories and severity levels
+  - Custom validation functions
+  - Auto-fix capabilities with fix functions
+  - Detailed validation results with recommendations
+- **Validation Reporting**: Comprehensive validation reports
+  - Aggregation by severity level
+  - Aggregation by rule category
+  - Critical failure highlighting
+  - Actionable recommendations
+- **Approval Workflow System**: Transformation approval framework
+  - Custom workflow registration
+  - Default policy: Allow normalized transformations only
+  - Per-transformation approval tracking
+  - Rejection logging and audit
+- **28 Comprehensive Tests**: Full validation coverage including integration tests
+
+#### 📊 Implementation Highlights
+
+```python
+# Complete COLPALI-800 governance and lineage workflow
+from colpali_engine.governance import (
+    LineageTracker,
+    LineageQuery,
+    GovernanceValidator
+)
+from colpali_engine.extraction.models import TransformationRule
+
+# Initialize governance system
+lineage_tracker = LineageTracker()
+validator = GovernanceValidator()
+
+# 1. Track source document
+source_node = lineage_tracker.record_source_document(
+    document_id="doc_001",
+    document_path="/data/invoice.pdf",
+    document_type="application/pdf",
+    file_size=1024000,
+    integrity_hash="abc123..."
+)
+
+# 2. Track document conversion
+conversion_node = lineage_tracker.record_document_conversion(
+    parent_node_id=source_node.node_id,
+    conversion_id="conv_001",
+    source_format="pdf",
+    target_format="png",
+    page_count=5,
+    conversion_tool="pdf2image"
+)
+
+# 3. Track ColPali embedding
+embedding_node = lineage_tracker.record_colpali_embedding(
+    parent_node_id=conversion_node.node_id,
+    embedding_id="emb_001",
+    model_name="vidore/colpali-v1.2",
+    embedding_dimension=128,
+    batch_size=32
+)
+
+# 4. Track BAML extraction
+extraction_node = lineage_tracker.record_baml_extraction(
+    parent_node_id=embedding_node.node_id,
+    extraction_id="extract_001",
+    schema_name="InvoiceExtraction",
+    confidence_threshold=0.8
+)
+
+# 5. Track canonical formatting with validation
+canonical_node = lineage_tracker.record_canonical_format(
+    parent_node_id=extraction_node.node_id,
+    canonical_id="canonical_001",
+    schema_version="1.0",
+    field_count=15,
+    integrity_hash="def456..."
+)
+
+# Validate canonical data
+canonical_results = validator.validate_canonical(canonical_data)
+canonical_report = validator.get_validation_report(canonical_results)
+
+print(f"Canonical Validation:")
+print(f"  Total rules: {canonical_report['total_rules']}")
+print(f"  Passed: {canonical_report['passed']}")
+print(f"  Failed: {canonical_report['failed']}")
+print(f"  Critical failures: {len(canonical_report['critical_failures'])}")
+
+# Block processing if critical failures exist
+if canonical_report['by_severity']['critical']['failed'] > 0:
+    raise ValueError("Critical canonical validation failures detected")
+
+# 6. Request transformation approval
+custom_transform = TransformationRule(
+    rule_id="flatten_items",
+    rule_type="normalize",
+    description="Flatten nested invoice items"
+)
+
+# Register custom approval workflow
+def strict_approval(rule: TransformationRule) -> bool:
+    # Only allow normalize and filter operations
+    return rule.rule_type in ["normalize", "filter"]
+
+validator.register_approval_workflow("strict_policy", strict_approval)
+
+# Request approval
+approved = validator.request_transformation_approval(
+    custom_transform,
+    workflow_id="strict_policy"
+)
+
+if not approved:
+    raise ValueError(f"Transformation {custom_transform.rule_id} not approved")
+
+# 7. Track shaped transformation
+shaped_node = lineage_tracker.record_shaped_transform(
+    parent_node_id=canonical_node.node_id,
+    shaped_id="shaped_001",
+    transformation_rules=[custom_transform],
+    is_1nf_compliant=True,
+    field_count=20
+)
+
+# Validate transformation
+transform_results = validator.validate_transformation(
+    canonical_data,
+    shaped_data
+)
+transform_report = validator.get_validation_report(transform_results)
+
+print(f"Transformation Validation:")
+print(f"  Total rules: {transform_report['total_rules']}")
+print(f"  Passed: {transform_report['passed']}")
+print(f"  Data distortion warnings: {transform_report['by_category']['data_distortion']['failed']}")
+
+# 8. Track export
+export_node = lineage_tracker.record_export_output(
+    parent_node_id=shaped_node.node_id,
+    export_id="export_001",
+    export_format="parquet",
+    output_path="/outputs/shaped_data.parquet",
+    compression="snappy",
+    record_count=100
+)
+
+# 9. Query complete lineage
+lineage_graph = lineage_tracker.get_complete_lineage()
+query = LineageQuery(lineage_graph)
+
+# Find transformation chain
+transformation_chain = query.get_transformation_chain()
+print(f"\nTransformation Chain:")
+for node in transformation_chain:
+    print(f"  {node.operation} ({node.node_type.value})")
+
+# Calculate total processing time
+total_time = query.get_processing_time(
+    source_node.node_id,
+    export_node.node_id
+)
+print(f"\nTotal Processing Time: {total_time:.2f}s")
+
+# Get performance summary
+perf_summary = query.get_performance_summary()
+print(f"\nPerformance Summary:")
+for node_type, metrics in perf_summary.items():
+    print(f"  {node_type}:")
+    print(f"    Count: {metrics['count']}")
+    print(f"    Avg Duration: {metrics['avg_duration']:.2f}s")
+    print(f"    Total Duration: {metrics['total_duration']:.2f}s")
+
+# 10. Export lineage for audit
+lineage_dict = lineage_graph.to_dict()
+# Save to file or database for compliance audit
+```
+
+#### 🏛️ Governance Architecture
+
+The governance framework ensures data integrity through multiple layers:
+
+1. **Lineage Tracking Layer**
+   - Complete transformation history from source to export
+   - Performance metrics at each stage
+   - Relationship tracking between all processing nodes
+   - Audit trail for compliance and debugging
+
+2. **Validation Rule Layer**
+   - Pre-defined rules for common integrity checks
+   - Custom rule registration for domain-specific needs
+   - Severity-based rule categorization
+   - Auto-fix capabilities for correctable issues
+
+3. **Approval Workflow Layer**
+   - Transformation authorization before application
+   - Custom workflow policies for different environments
+   - Default safe transformations (normalize, filter, rename, aggregate)
+   - Rejection tracking for audit compliance
+
+4. **Reporting Layer**
+   - Comprehensive validation reports
+   - Severity and category aggregations
+   - Critical failure highlighting
+   - Actionable recommendations
+
+#### 🧪 Testing Coverage
+
+- **Lineage Tests**: 34 tests covering all tracking operations
+  - Node creation and serialization
+  - Graph operations (paths, ancestors, descendants)
+  - Tracker recording for all pipeline stages
+  - Query system functionality
+  - Complete integration tests
+
+- **Validation Tests**: 28 tests covering all validation rules
+  - ValidationResult and ValidationRule functionality
+  - All default rule categories
+  - Custom rule registration
+  - Approval workflow system
+  - Complete integration tests
+
+**Total**: 62 comprehensive tests ensuring governance system reliability
+
+*Complete governance framework production-ready with transformation lineage tracking, validation rules, and approval workflows.*
