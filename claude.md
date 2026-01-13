@@ -39,6 +39,8 @@ This document establishes the development workflow and rules for the ColPali-BAM
 
 5. **Merge and Iteration Process**
    - Once story is complete and README updated, merge to `main`
+   - Push the updated `main` branch to remote: `git push origin main`
+   - Delete the feature branch locally and remotely (if pushed)
    - Immediately create new branch for the next JIRA story
    - Continue this cycle through all 11 stories in the implementation plan
 
@@ -88,8 +90,9 @@ Use the TodoWrite tool to maintain visibility into:
    - ✅ Create proper merge commit with detailed message
 
 3. **Post-Merge Cleanup**:
-   - ✅ Delete feature branch after successful merge
-   - ✅ Push updated main branch to origin
+   - ✅ Push updated main branch to origin: `git push origin main`
+   - ✅ Delete feature branch locally: `git branch -d feature/COLPALI-XXX-xxx`
+   - ✅ Delete feature branch remotely (if pushed): `git push origin --delete feature/COLPALI-XXX-xxx`
    - ✅ Verify git graph shows clean branch/merge pattern
 
 ### Development Integrity Requirements
