@@ -54,9 +54,10 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-500 (BAML Schema System) ✅
   - COLPALI-600 (Extraction & Validation) ✅
   - COLPALI-700 (Output Management) ✅
-- **Active Story**: COLPALI-800 (Governance & Lineage)
-- **Current Branch**: `main` (ready for next feature branch)
-- **Next**: Implement transformation lineage tracking and governance validation rules
+  - COLPALI-800 (Governance & Lineage) ✅
+- **Active Story**: Ready for COLPALI-900 (Lambda Deployment)
+- **Current Branch**: `main`
+- **Next**: Optimize for AWS Lambda deployment with 3B model support
 
 ### Story Progress Tracking
 
