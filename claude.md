@@ -49,9 +49,11 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-200 (Document Processing Pipeline) ✅
   - COLPALI-300 (ColPali Vision Integration) ✅
   - COLPALI-400 (Qdrant Vector Storage Integration) ✅
-- **Active Story**: COLPALI-500 (BAML Schema System Integration)
-- **Current Branch**: `main` (ready for next feature branch)
-- **Next**: Implement dynamic schema system with JSON-to-BAML conversion engine
+  - COLPALI-500 (BAML Schema System) ✅
+  - COLPALI-600 (Extraction & Validation) ✅
+- **Active Story**: COLPALI-700 (Output Management)
+- **Current Branch**: `feature/COLPALI-700-output-management`
+- **Next**: Implement dual-output architecture with canonical truth layer and shaped output layer
 
 ### Story Progress Tracking
 
