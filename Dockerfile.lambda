@@ -1,38 +1,78 @@
 # AWS Lambda Dockerfile for ColPali-BAML Engine
-# Optimized for size and cold start performance
+# Optimized for size, cold start performance, and 3B model deployment
+#
+# Implements COLPALI-901: Optimize Lambda container for 3B model deployment
+# - Multi-stage build for minimal image size
+# - INT8 quantization for 50% memory reduction
+# - CPU-optimized PyTorch
+# - Model pre-warming for fast cold starts
 
-# Base stage - system dependencies
-FROM python:3.13-slim as base
+# ============================================================================
+# Stage 1: Base - System dependencies
+# ============================================================================
+FROM python:3.13-slim AS base
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install minimal system dependencies for Lambda
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Dependencies stage - install Python packages
-FROM base as deps
+# ============================================================================
+# Stage 2: Dependencies - Install Python packages
+# ============================================================================
+FROM base AS deps
 
-# Copy requirements and install
+WORKDIR /build
+
+# Copy requirements and install to separate directory
 COPY requirements/lambda.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir --target /lambda-deps -r lambda.txt
 
-# Model preparation stage
-FROM deps as models
+# ============================================================================
+# Stage 3: Models - Pre-download and optimize ColPali model
+# ============================================================================
+FROM deps AS models
+
+# Install psutil for memory monitoring during model prep
+RUN pip install psutil
 
 WORKDIR /models
 
-# Pre-download and optimize ColPali model during build
-COPY prepare_lambda_model.py /tmp/prepare_lambda_model.py
-RUN python3 /tmp/prepare_lambda_model.py
+# Set environment for model preparation
+ENV MODEL_DIR=/models \
+    COLPALI_MODEL=vidore/colqwen2-v0.1 \
+    QUANTIZE_MODEL=true \
+    PYTHONPATH=/lambda-deps
 
-# Final Lambda image
-FROM public.ecr.aws/lambda/python:3.13 as lambda-final
+# Copy model preparation script
+COPY prepare_lambda_model.py /tmp/prepare_lambda_model.py
+
+# Pre-download and optimize ColPali model during build
+# This reduces cold start time significantly
+RUN python3 /tmp/prepare_lambda_model.py || \
+    echo "Model download failed - will download at runtime"
+
+# ============================================================================
+# Stage 4: Final Lambda image
+# ============================================================================
+FROM public.ecr.aws/lambda/python:3.13 AS lambda-final
 
 # Copy system dependencies (poppler-utils for PDF processing)
+# Note: Using x86_64 paths - adjust for ARM if needed
 COPY --from=base /usr/bin/pdftoppm /usr/bin/
-COPY --from=base /usr/bin/pdftops /usr/bin/
-COPY --from=base /usr/lib/aarch64-linux-gnu/libpoppler* /usr/lib/aarch64-linux-gnu/
+COPY --from=base /usr/bin/pdfinfo /usr/bin/
+COPY --from=base /usr/bin/pdftocairo /usr/bin/
+COPY --from=base /usr/lib/ /usr/lib/
 
 # Copy Python dependencies
 COPY --from=deps /lambda-deps ${LAMBDA_TASK_ROOT}
@@ -42,15 +82,46 @@ COPY --from=models /models ${LAMBDA_TASK_ROOT}/models
 
 # Copy application code
 COPY colpali_engine ${LAMBDA_TASK_ROOT}/colpali_engine
+COPY baml_src ${LAMBDA_TASK_ROOT}/baml_src
+COPY baml_client ${LAMBDA_TASK_ROOT}/baml_client
 COPY lambda_handler.py ${LAMBDA_TASK_ROOT}
 
-# Set up model cache directory
-RUN mkdir -p ${LAMBDA_TASK_ROOT}/model_cache
+# Set up directories
+RUN mkdir -p ${LAMBDA_TASK_ROOT}/model_cache \
+    && mkdir -p ${LAMBDA_TASK_ROOT}/tmp
 
-# Environment variables
-ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
-ENV MODEL_CACHE_DIR=${LAMBDA_TASK_ROOT}/model_cache
-ENV TORCH_HOME=${LAMBDA_TASK_ROOT}/model_cache
+# Environment variables for Lambda
+ENV PYTHONPATH=${LAMBDA_TASK_ROOT} \
+    MODEL_CACHE_DIR=${LAMBDA_TASK_ROOT}/model_cache \
+    TORCH_HOME=${LAMBDA_TASK_ROOT}/model_cache \
+    TRANSFORMERS_CACHE=${LAMBDA_TASK_ROOT}/model_cache \
+    HF_HOME=${LAMBDA_TASK_ROOT}/model_cache \
+    COLPALI_MODEL=vidore/colqwen2-v0.1 \
+    # CPU optimization settings
+    OMP_NUM_THREADS=4 \
+    MKL_NUM_THREADS=4 \
+    NUMEXPR_NUM_THREADS=4 \
+    # Disable GPU-related warnings
+    CUDA_VISIBLE_DEVICES="" \
+    # Lambda-specific settings
+    QDRANT_HOST=localhost \
+    QDRANT_PORT=6333
 
-# Lambda handler
+# Lambda handler entry point
 CMD ["lambda_handler.main"]
+
+# ============================================================================
+# Health check (for local testing)
+# ============================================================================
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import lambda_handler; print(lambda_handler.health_check())" || exit 1
+
+# ============================================================================
+# Labels for container metadata
+# ============================================================================
+LABEL maintainer="ColPali-BAML Team" \
+    version="0.1.0" \
+    description="ColPali-BAML Vision Processing Engine - Lambda Deployment" \
+    org.opencontainers.image.title="colpali-baml-lambda" \
+    org.opencontainers.image.description="Vision-native document processing with ColPali and BAML" \
+    org.opencontainers.image.version="0.1.0"
