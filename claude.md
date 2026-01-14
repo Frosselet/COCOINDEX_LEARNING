@@ -283,25 +283,110 @@ When tests depend on specific environments (GPU, specific libraries, etc.):
 
 ### Git Workflow Validation
 
-**CRITICAL**: Before starting any new story, validate the git workflow:
+**CRITICAL**: Follow this EXACT workflow for every story to maintain consistent git history across sessions.
 
-1. **Pre-Development Checklist**:
-   - ✅ Confirm you are on `main` branch
-   - ✅ Create feature branch: `feature/COLPALI-XXX-short-description`
-   - ✅ NEVER commit directly to `main` branch
-   - ✅ Reference JIRA ticket number in all commits
+#### 1. Starting a New Story
 
-2. **Pre-Merge Validation**:
-   - ✅ All commits are on feature branch, not main
-   - ✅ Git log shows proper branch/merge structure
-   - ✅ All acceptance criteria completed on feature branch
-   - ✅ Create proper merge commit with detailed message
+```bash
+# Ensure you're on main and up to date
+git checkout main
+git pull origin main
 
-3. **Post-Merge Cleanup**:
-   - ✅ Push updated main branch to origin: `git push origin main`
-   - ✅ Delete feature branch locally: `git branch -d feature/COLPALI-XXX-xxx`
-   - ✅ Delete feature branch remotely (if pushed): `git push origin --delete feature/COLPALI-XXX-xxx`
-   - ✅ Verify git graph shows clean branch/merge pattern
+# Create feature branch (NEVER work directly on main)
+git checkout -b feature/COLPALI-XXX-short-description
+```
+
+#### 2. During Development
+
+```bash
+# Commit frequently with JIRA reference
+git add -A
+git commit -m "feat: COLPALI-XXX - Description of change
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+```
+
+#### 3. Merging to Main (CRITICAL - Use --no-ff)
+
+**ALWAYS use `--no-ff` flag** to create a merge commit. This preserves the visual branch/merge history in git graph.
+
+```bash
+# Switch to main
+git checkout main
+
+# Merge with --no-ff (NEVER fast-forward)
+git merge --no-ff feature/COLPALI-XXX-short-description -m "$(cat <<'EOF'
+Merge feature/COLPALI-XXX-short-description: Brief Title
+
+Story X of 11: Description of what was implemented
+- Key feature 1
+- Key feature 2
+- Key feature 3
+
+Test Results: XX tests (XX passed, XX skipped)
+EOF
+)"
+```
+
+**WHY `--no-ff`?** Without it, git does a fast-forward merge which creates a linear history with no visual branch. The `--no-ff` flag forces a merge commit, showing the branch/merge pattern in git graph tools.
+
+#### 4. Post-Merge Status Update
+
+```bash
+# Update CLAUDE.md status (Current Branch should be `main`)
+# Then commit the status update
+git add CLAUDE.md
+git commit -m "$(cat <<'EOF'
+CLAUDE.md: Update status - Story X completed and merged
+
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+#### 5. Cleanup and Push
+
+```bash
+# Delete feature branch locally
+git branch -d feature/COLPALI-XXX-short-description
+
+# Push to remote
+git push origin main
+
+# Delete remote branch if it was pushed
+git push origin --delete feature/COLPALI-XXX-short-description
+```
+
+#### 6. Verify Git Graph
+
+After merge, verify the git graph shows proper branch/merge pattern:
+
+```bash
+git log --oneline --graph -10
+```
+
+Expected output should show branch divergence and merge:
+```
+* abc1234 CLAUDE.md: Update status - Story X completed and merged
+*   def5678 Merge feature/COLPALI-XXX: Title
+|\
+| * ghi9012 feat: Implement COLPALI-XXX - Feature
+|/
+* jkl3456 CLAUDE.md: Update status - Story X-1 completed and merged
+```
+
+#### Pre-Merge Checklist
+
+- [ ] All commits are on feature branch, not main
+- [ ] All tests pass (100% pass rate or documented skips)
+- [ ] JIRA plan updated with ✅ checkmarks
+- [ ] README updated with story documentation
+- [ ] `git merge --no-ff` used (NOT fast-forward)
+- [ ] Merge commit message follows template
+- [ ] CLAUDE.md status updated after merge
+- [ ] Feature branch deleted
+- [ ] Changes pushed to origin
+- [ ] Git graph verified shows branch/merge pattern
 
 ### Development Integrity Requirements
 
