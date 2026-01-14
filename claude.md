@@ -57,7 +57,7 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-800 (Governance & Lineage) ✅
   - COLPALI-900 (Lambda Deployment) ✅
 - **Active Story**: Ready for COLPALI-1000 (Testing & Validation)
-- **Current Branch**: `feature/COLPALI-900-lambda-deployment`
+- **Current Branch**: `main`
 - **Next**: Comprehensive testing with 15 PDF samples and performance benchmarking
 
 ### Story Progress Tracking
