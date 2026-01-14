@@ -55,9 +55,10 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-600 (Extraction & Validation) ✅
   - COLPALI-700 (Output Management) ✅
   - COLPALI-800 (Governance & Lineage) ✅
-- **Active Story**: Ready for COLPALI-900 (Lambda Deployment)
-- **Current Branch**: `main`
-- **Next**: Optimize for AWS Lambda deployment with 3B model support
+  - COLPALI-900 (Lambda Deployment) ✅
+- **Active Story**: Ready for COLPALI-1000 (Testing & Validation)
+- **Current Branch**: `feature/COLPALI-900-lambda-deployment`
+- **Next**: Comprehensive testing with 15 PDF samples and performance benchmarking
 
 ### Story Progress Tracking
 
@@ -74,6 +75,211 @@ Use the TodoWrite tool to maintain visibility into:
 - Code must follow established architectural patterns
 - Documentation must be complete and accurate
 - Memory and performance requirements must be met
+
+---
+
+## Testing Framework & Guidelines
+
+### Philosophy: 100% Pass Rate Required
+
+**Tests exist to validate implementation correctness. Anything less than 100% pass rate is unacceptable for merge.**
+
+- A 70% pass rate means 30% of functionality is broken
+- Modifying tests to "accept failure" is forbidden - this hides bugs
+- Tests should be precise, not lenient
+- When tests fail, fix the CODE, not the tests (unless tests are genuinely wrong)
+
+### Test Organization by JIRA Structure
+
+Tests follow the JIRA story/task hierarchy:
+
+```
+tests/
+├── unit/                           # Unit tests for individual tasks
+│   ├── COLPALI-901/               # Task-level tests
+│   │   ├── test_model_optimizer.py
+│   │   └── test_quantization.py
+│   ├── COLPALI-902/
+│   │   └── test_resource_manager.py
+│   └── ...
+├── integration/                    # Integration tests for stories
+│   ├── test_colpali_900_integration.py  # Story-level integration
+│   └── ...
+└── e2e/                           # End-to-end tests
+    └── test_full_pipeline.py
+```
+
+### Test Planning Template
+
+**Before writing ANY code for a task, create the test plan:**
+
+```markdown
+## Test Plan: COLPALI-XXX - [Task Name]
+
+### Unit Tests Required
+| Test Case | Description | Expected Behavior | Priority |
+|-----------|-------------|-------------------|----------|
+| test_xxx_happy_path | Normal operation | Returns expected result | P0 |
+| test_xxx_edge_case_empty | Empty input | Handles gracefully | P1 |
+| test_xxx_error_condition | Invalid input | Raises appropriate error | P1 |
+
+### Dependencies & Environment Requirements
+- Required packages: [list]
+- Environment variables: [list]
+- External services: [list]
+
+### Integration Test Scope (Story Level)
+- Component A + Component B interaction
+- End-to-end flow validation
+```
+
+### Test Execution Protocol
+
+**MANDATORY: Execute tests at EVERY step, not just before merge.**
+
+1. **After writing each test file:**
+   ```bash
+   PYTHONPATH=. pytest tests/path/to/new_test.py -v
+   ```
+
+2. **After implementing each task:**
+   ```bash
+   PYTHONPATH=. pytest tests/unit/COLPALI-XXX/ -v
+   ```
+
+3. **After completing a story:**
+   ```bash
+   PYTHONPATH=. pytest tests/integration/test_colpali_XXX_integration.py -v
+   ```
+
+4. **Before merge (full suite):**
+   ```bash
+   PYTHONPATH=. pytest tests/ -v --tb=short
+   ```
+
+### Test Failure Analysis Template
+
+**When tests fail, document using this exact template:**
+
+```markdown
+## Test Failure Report
+
+**Date:** [YYYY-MM-DD]
+**Task:** COLPALI-XXX
+**Test File:** tests/path/to/test.py
+
+### Failure Summary
+| Metric | Value |
+|--------|-------|
+| Total Tests | XX |
+| Passed | XX |
+| Failed | XX |
+| Pass Rate | XX% |
+
+### Failed Tests Detail
+
+#### 1. test_name_here
+- **Error Message:** [exact error]
+- **Root Cause:** [code bug / environment issue / test design flaw / missing dependency]
+- **Criticality:** [BLOCKER / HIGH / MEDIUM / LOW]
+- **Impact:** [What functionality is affected]
+- **Resolution:** [Fix applied OR why it's acceptable to defer]
+
+#### 2. test_name_here
+[repeat for each failure]
+
+### Criticality Definitions
+- **BLOCKER:** Core functionality broken. MUST fix before proceeding.
+- **HIGH:** Important feature affected. Should fix before merge.
+- **MEDIUM:** Edge case or minor feature. Document and track.
+- **LOW:** Non-critical, environment-specific. Document for future.
+
+### Decision
+- [ ] All failures resolved - proceed with merge
+- [ ] Deferred failures documented with tracking issue
+- [ ] BLOCKED - must fix before continuing
+```
+
+### Forbidden Practices
+
+1. **NO test modification to hide failures:**
+   ```python
+   # FORBIDDEN: Making test accept failure
+   if not result:
+       pass  # This hides the bug!
+
+   # CORRECT: Test should fail if expectation not met
+   assert result, "Expected result to be truthy"
+   ```
+
+2. **NO skipping tests without documentation:**
+   ```python
+   # FORBIDDEN
+   @pytest.mark.skip
+   def test_something():
+       ...
+
+   # ALLOWED (with clear reason)
+   @pytest.mark.skip(reason="Requires FBGEMM engine not available in CI - tracked in COLPALI-999")
+   def test_quantization_specific():
+       ...
+   ```
+
+3. **NO "lenient" assertions:**
+   ```python
+   # FORBIDDEN: Accepting any outcome
+   if quantization_worked:
+       assert size_reduced
+   else:
+       pass  # Silently accepts failure
+
+   # CORRECT: Be explicit about environment requirements
+   @pytest.mark.skipif(not QUANTIZATION_AVAILABLE, reason="Requires FBGEMM")
+   def test_quantization_reduces_size():
+       assert quantized_size < original_size
+   ```
+
+### Environment-Specific Test Handling
+
+When tests depend on specific environments (GPU, specific libraries, etc.):
+
+1. **Use pytest markers:**
+   ```python
+   import pytest
+
+   FBGEMM_AVAILABLE = check_fbgemm()
+
+   @pytest.mark.skipif(not FBGEMM_AVAILABLE, reason="Requires FBGEMM quantization engine")
+   def test_int8_quantization():
+       # Test only runs when FBGEMM is available
+       ...
+   ```
+
+2. **Document in test file header:**
+   ```python
+   """
+   Tests for model quantization.
+
+   Environment Requirements:
+   - PyTorch with FBGEMM backend (Intel CPUs or specific builds)
+   - 8GB+ RAM for large model tests
+
+   Skip Conditions:
+   - Tests marked with @skipif will skip gracefully if FBGEMM unavailable
+   """
+   ```
+
+3. **CI/CD configuration should match production environment**
+
+### Pre-Merge Checklist
+
+- [ ] All tests executed with `pytest tests/ -v`
+- [ ] 100% pass rate achieved (or failures documented per template)
+- [ ] No test modifications made to hide failures
+- [ ] Environment-specific skips properly documented with markers
+- [ ] Test failure report generated if any failures occurred
+- [ ] BLOCKER/HIGH failures resolved before merge
+- [ ] MEDIUM/LOW failures tracked with issues
 
 ### Git Workflow Validation
 
