@@ -9,7 +9,7 @@ import pytest
 import json
 from typing import Dict, Any
 
-from colpali_engine.core.schema_manager import (
+from tatforge.core.schema_manager import (
     SchemaManager,
     BAMLDefinition,
     BAMLClass,

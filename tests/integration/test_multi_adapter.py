@@ -106,13 +106,13 @@ class MultiAdapterTester:
 
             # Import the core components (minimal versions if full package fails)
             try:
-                from colpali_engine.core.document_adapter import (
+                from tatforge.core.document_adapter import (
                     DocumentAdapter, DocumentFormat, ConversionConfig,
                     DocumentProcessingError, UnsupportedFormatError
                 )
-                from colpali_engine.adapters.pdf_adapter import create_pdf_adapter
-                from colpali_engine.adapters.image_adapter import create_image_adapter
-                from colpali_engine.adapters.html_adapter import create_html_adapter
+                from tatforge.adapters.pdf_adapter import create_pdf_adapter
+                from tatforge.adapters.image_adapter import create_image_adapter
+                from tatforge.adapters.html_adapter import create_html_adapter
                 adapter_imports_available = True
             except ImportError as e:
                 print(f"⚠️  Full adapter imports failed: {e}")
@@ -191,10 +191,10 @@ class MultiAdapterTester:
             return False
 
         try:
-            from colpali_engine.core.document_adapter import DocumentAdapter, DocumentFormat
-            from colpali_engine.adapters.pdf_adapter import create_pdf_adapter
-            from colpali_engine.adapters.image_adapter import create_image_adapter
-            from colpali_engine.adapters.html_adapter import create_html_adapter
+            from tatforge.core.document_adapter import DocumentAdapter, DocumentFormat
+            from tatforge.adapters.pdf_adapter import create_pdf_adapter
+            from tatforge.adapters.image_adapter import create_image_adapter
+            from tatforge.adapters.html_adapter import create_html_adapter
 
             # Create adapter instance
             adapter = DocumentAdapter()
@@ -231,7 +231,7 @@ class MultiAdapterTester:
             return False
 
         try:
-            from colpali_engine.core.document_adapter import DocumentAdapter
+            from tatforge.core.document_adapter import DocumentAdapter
 
             adapter = DocumentAdapter()
             test_docs = create_test_documents()
@@ -292,10 +292,10 @@ class MultiAdapterTester:
             return False
 
         try:
-            from colpali_engine.core.document_adapter import (
+            from tatforge.core.document_adapter import (
                 DocumentAdapter, DocumentFormat, ConversionConfig
             )
-            from colpali_engine.adapters import (
+            from tatforge.adapters import (
                 create_pdf_adapter, create_image_adapter, create_html_adapter
             )
 
@@ -382,10 +382,10 @@ class MultiAdapterTester:
             return False
 
         try:
-            from colpali_engine.core.document_adapter import (
+            from tatforge.core.document_adapter import (
                 DocumentAdapter, UnsupportedFormatError
             )
-            from colpali_engine.adapters import create_image_adapter
+            from tatforge.adapters import create_image_adapter
 
             adapter = DocumentAdapter()
             adapter.register_adapter(DocumentFormat.IMAGE, create_image_adapter())
@@ -437,8 +437,8 @@ class MultiAdapterTester:
             return False
 
         try:
-            from colpali_engine.core.document_adapter import ConversionConfig
-            from colpali_engine.adapters import create_image_adapter
+            from tatforge.core.document_adapter import ConversionConfig
+            from tatforge.adapters import create_image_adapter
 
             config_tests_passed = 0
             total_config_tests = 0

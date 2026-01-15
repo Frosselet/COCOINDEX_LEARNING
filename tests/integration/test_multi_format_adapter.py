@@ -187,14 +187,14 @@ class MultiFormatAdapterTester:
 
         # Import the full adapter system
         try:
-            from colpali_engine.core.document_adapter import (
+            from tatforge.core.document_adapter import (
                 DocumentAdapter, DocumentFormat, ConversionConfig,
                 BaseDocumentAdapter, DocumentProcessingError,
                 UnsupportedFormatError, MetadataExtractionError
             )
-            from colpali_engine.adapters.pdf_adapter import create_pdf_adapter
-            from colpali_engine.adapters.image_adapter import create_image_adapter
-            from colpali_engine.adapters.html_adapter import create_html_adapter
+            from tatforge.adapters.pdf_adapter import create_pdf_adapter
+            from tatforge.adapters.image_adapter import create_image_adapter
+            from tatforge.adapters.html_adapter import create_html_adapter
 
             print("✓ All adapter modules imported successfully")
 
@@ -327,7 +327,7 @@ class MultiFormatAdapterTester:
     async def _test_mime_detection(self, DocumentAdapter) -> bool:
         """Test MIME type detection and routing capabilities."""
         try:
-            from colpali_engine.core.document_adapter import DocumentFormat
+            from tatforge.core.document_adapter import DocumentFormat
 
             adapter = DocumentAdapter()
             test_docs = create_test_documents()
@@ -413,7 +413,7 @@ class MultiFormatAdapterTester:
                                         create_image_adapter, create_html_adapter) -> bool:
         """Test format-specific configuration support."""
         try:
-            from colpali_engine.core.document_adapter import DocumentFormat
+            from tatforge.core.document_adapter import DocumentFormat
 
             adapter = DocumentAdapter()
             adapter.register_adapter(DocumentFormat.IMAGE, create_image_adapter())
@@ -563,7 +563,7 @@ class MultiFormatAdapterTester:
                                           create_html_adapter) -> bool:
         """Test end-to-end multi-format processing pipeline."""
         try:
-            from colpali_engine.core.document_adapter import DocumentFormat
+            from tatforge.core.document_adapter import DocumentFormat
 
             adapter = DocumentAdapter()
 
@@ -669,7 +669,7 @@ class MultiFormatAdapterTester:
                     return [image]
 
                 def extract_metadata(self, content: bytes):
-                    from colpali_engine.core.document_adapter import DocumentMetadata
+                    from tatforge.core.document_adapter import DocumentMetadata
                     return DocumentMetadata(
                         format=DocumentFormat.IMAGE,
                         page_count=1,

@@ -13,8 +13,8 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 # Import required components directly
-from colpali_engine.core.document_adapter import ConversionConfig, DocumentFormat, DocumentMetadata
-from colpali_engine.adapters.pdf_adapter import PDFAdapter
+from tatforge.core.document_adapter import ConversionConfig, DocumentFormat, DocumentMetadata
+from tatforge.adapters.pdf_adapter import PDFAdapter
 
 async def test_pdf_adapter():
     """Test PDF adapter with basic functionality."""

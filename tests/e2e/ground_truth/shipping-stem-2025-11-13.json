@@ -1,0 +1,9 @@
+{
+  "filename": "shipping-stem-2025-11-13.pdf",
+  "expected_pages": 3,
+  "expected_format": "RGB",
+  "min_width": 100,
+  "min_height": 100,
+  "expected_metadata": {},
+  "quality_threshold": 0.7
+}

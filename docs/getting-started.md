@@ -65,7 +65,7 @@ PYTHONPATH=. pytest tests/ -v --tb=short
 
 ```python
 # Quick example (run in Python shell or Jupyter)
-from colpali_engine import VisionExtractionPipeline, SchemaManager
+from tatforge import VisionExtractionPipeline, SchemaManager
 
 # Initialize pipeline
 pipeline = VisionExtractionPipeline()
@@ -213,7 +213,7 @@ Create `.vscode/settings.json`:
 #### PyCharm
 
 1. Set Python interpreter: `.venv/bin/python`
-2. Mark `colpali_engine` as Sources Root
+2. Mark `tatforge` as Sources Root
 3. Configure pytest as test runner
 4. Enable Black formatter
 
@@ -223,7 +223,7 @@ Create `.vscode/settings.json`:
 
 ```
 colpali-qdrant-baml/
-├── colpali_engine/              # Main package
+├── tatforge/              # Main package
 │   ├── __init__.py             # Public API exports
 │   ├── core/                   # Business logic & orchestration
 │   │   ├── pipeline.py         # VisionExtractionPipeline
@@ -297,7 +297,7 @@ colpali-qdrant-baml/
 
 ```python
 import asyncio
-from colpali_engine import VisionExtractionPipeline, SchemaManager
+from tatforge import VisionExtractionPipeline, SchemaManager
 
 async def process_invoice():
     """Process an invoice document."""
@@ -359,7 +359,7 @@ result = asyncio.run(process_invoice())
 ### Schema Conversion
 
 ```python
-from colpali_engine.core.schema_manager import SchemaManager
+from tatforge.core.schema_manager import SchemaManager
 
 # Initialize schema manager
 schema_manager = SchemaManager()
@@ -387,7 +387,7 @@ print(baml_code)
 ### Working with Qdrant
 
 ```python
-from colpali_engine.storage.qdrant_client import QdrantManager
+from tatforge.storage.qdrant_client import QdrantManager
 
 # Initialize client
 qdrant = QdrantManager(host="localhost", port=6333)
@@ -422,9 +422,9 @@ results = await qdrant.search(
 ### Output Formatting
 
 ```python
-from colpali_engine.outputs.canonical import CanonicalFormatter
-from colpali_engine.outputs.shaped import ShapedFormatter
-from colpali_engine.outputs.exporters import DataExporter
+from tatforge.outputs.canonical import CanonicalFormatter
+from tatforge.outputs.shaped import ShapedFormatter
+from tatforge.outputs.exporters import DataExporter
 
 # Create canonical (truth) output
 canonical_formatter = CanonicalFormatter()
@@ -467,7 +467,7 @@ exporter.export_csv(
 ### Error Handling
 
 ```python
-from colpali_engine.extraction.error_handling import (
+from tatforge.extraction.error_handling import (
     ErrorHandler,
     ExtractionError,
     RetryableError
@@ -531,7 +531,7 @@ PYTHONPATH=. pytest tests/unit/test_schema_manager.py -v
 PYTHONPATH=. pytest tests/ -k "pdf" -v
 
 # Run with coverage
-PYTHONPATH=. pytest tests/ --cov=colpali_engine --cov-report=html
+PYTHONPATH=. pytest tests/ --cov=tatforge --cov-report=html
 
 # Run only fast tests (no PDF processing)
 PYTHONPATH=. pytest tests/unit/ -v --ignore=tests/e2e/
@@ -545,7 +545,7 @@ PYTHONPATH=. pytest tests/unit/ -v --ignore=tests/e2e/
 """tests/unit/test_schema_converter.py"""
 
 import pytest
-from colpali_engine.core.schema_manager import SchemaManager
+from tatforge.core.schema_manager import SchemaManager
 
 
 class TestSchemaManager:
@@ -625,7 +625,7 @@ class TestExtractionPipeline:
     @pytest.mark.asyncio
     async def test_pdf_extraction_end_to_end(self, sample_pdf):
         """Test complete PDF extraction flow."""
-        from colpali_engine import VisionExtractionPipeline
+        from tatforge import VisionExtractionPipeline
 
         pipeline = VisionExtractionPipeline()
 
@@ -723,12 +723,12 @@ EOF
 
 1. **Formatting**: Use Black with default settings
    ```bash
-   black colpali_engine/ tests/
+   black tatforge/ tests/
    ```
 
 2. **Linting**: Use flake8
    ```bash
-   flake8 colpali_engine/ tests/ --max-line-length=100
+   flake8 tatforge/ tests/ --max-line-length=100
    ```
 
 3. **Type Hints**: Use type annotations for all public methods
@@ -844,7 +844,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Or for specific module
-logging.getLogger("colpali_engine.vision").setLevel(logging.DEBUG)
+logging.getLogger("tatforge.vision").setLevel(logging.DEBUG)
 ```
 
 ### Using Debugger
@@ -895,7 +895,7 @@ async with managed_pipeline() as pipeline:
 ### Factory Pattern
 
 ```python
-from colpali_engine.adapters import PDFAdapter, ImageAdapter, HTMLAdapter
+from tatforge.adapters import PDFAdapter, ImageAdapter, HTMLAdapter
 
 def create_adapter(mime_type: str):
     """Create appropriate adapter for MIME type."""

@@ -8,7 +8,7 @@ prompts and intelligent client selection based on schema complexity.
 import pytest
 from typing import Dict, Any
 
-from colpali_engine.core.baml_function_generator import (
+from tatforge.core.baml_function_generator import (
     BAMLFunctionGenerator,
     ClientComplexity,
     PromptOptimization,
@@ -16,7 +16,7 @@ from colpali_engine.core.baml_function_generator import (
     PromptTemplate,
     FunctionGenerationError
 )
-from colpali_engine.core.schema_manager import (
+from tatforge.core.schema_manager import (
     SchemaManager,
     BAMLDefinition,
     BAMLClass,

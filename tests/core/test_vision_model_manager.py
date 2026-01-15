@@ -12,7 +12,7 @@ import tempfile
 import json
 import os
 
-from colpali_engine.core.vision_model_manager import (
+from tatforge.core.vision_model_manager import (
     VisionModelManager,
     VisionModelSpec,
     VisionModelCapability,
@@ -21,9 +21,9 @@ from colpali_engine.core.vision_model_manager import (
     ImageProcessingConfig,
     VisionFallbackResult
 )
-from colpali_engine.core.baml_client_manager import BAMLClientManager, BAMLClient, ClientType
-from colpali_engine.core.baml_function_generator import ClientComplexity
-from colpali_engine.core.schema_manager import BAMLFunction
+from tatforge.core.baml_client_manager import BAMLClientManager, BAMLClient, ClientType
+from tatforge.core.baml_function_generator import ClientComplexity
+from tatforge.core.schema_manager import BAMLFunction
 
 
 class TestVisionModelSpec:

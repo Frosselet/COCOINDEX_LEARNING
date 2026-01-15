@@ -47,7 +47,7 @@ PDF_ADAPTER_AVAILABLE = False
 PDF_ADAPTER_ERROR = None
 
 try:
-    from colpali_engine.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
+    from tatforge.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
     PDF_ADAPTER_AVAILABLE = True
 except ImportError as e:
     PDF_ADAPTER_ERROR = str(e)
@@ -699,9 +699,9 @@ class TestRegressionDetection:
     """Test quality regression detection."""
 
     @pytest.fixture
-    def accuracy_baseline_file(self, benchmark_results_dir) -> Path:
+    def accuracy_baseline_file(self, test_results_directory) -> Path:
         """Path to accuracy baseline file."""
-        return benchmark_results_dir / "accuracy_baseline.json"
+        return test_results_directory / "accuracy_baseline.json"
 
     def test_save_accuracy_baseline(
         self,

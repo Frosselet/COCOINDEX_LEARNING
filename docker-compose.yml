@@ -35,7 +35,7 @@ services:
       - "5000:5000"  # Debug port
     volumes:
       # Source code hot-reload
-      - ./colpali_engine:/app/colpali_engine
+      - ./tatforge:/app/tatforge
       - ./tests:/app/tests
       # Test data
       - ./pdfs:/app/test_data
@@ -71,7 +71,7 @@ services:
       # Notebooks
       - ./notebooks:/home/jupyter/notebooks
       # Source code (read-only for analysis)
-      - ./colpali_engine:/app/colpali_engine:ro
+      - ./tatforge:/app/tatforge:ro
       # Test data
       - ./pdfs:/app/test_data:ro
       # Model cache

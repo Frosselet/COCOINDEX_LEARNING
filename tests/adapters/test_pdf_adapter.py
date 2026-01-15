@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 import io
 
-from colpali_engine.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
-from colpali_engine.core.document_adapter import ConversionConfig, DocumentMetadata
+from tatforge.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
+from tatforge.core.document_adapter import ConversionConfig, DocumentMetadata
 
 # Configure logging
 logging.basicConfig(

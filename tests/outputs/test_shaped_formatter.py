@@ -7,8 +7,8 @@ COLPALI-702: Shaped data formatter implementation tests.
 import pytest
 import asyncio
 from datetime import datetime
-from colpali_engine.outputs.shaped import ShapedFormatter
-from colpali_engine.extraction.models import CanonicalData, ShapedData, TransformationRule
+from tatforge.outputs.shaped import ShapedFormatter
+from tatforge.extraction.models import CanonicalData, ShapedData, TransformationRule
 
 
 class TestShapedFormatter:

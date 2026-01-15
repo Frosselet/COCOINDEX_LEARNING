@@ -50,13 +50,13 @@ PDF_ADAPTER_ERROR = None
 IMAGE_PROCESSOR_ERROR = None
 
 try:
-    from colpali_engine.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
+    from tatforge.adapters.pdf_adapter import PDFAdapter, create_pdf_adapter
     PDF_ADAPTER_AVAILABLE = True
 except ImportError as e:
     PDF_ADAPTER_ERROR = str(e)
 
 try:
-    from colpali_engine.adapters.image_processor import (
+    from tatforge.adapters.image_processor import (
         ImageProcessor,
         create_image_processor,
         ProcessingConfig

@@ -1,0 +1,298 @@
+{
+  "timestamp": "2026-01-15T07:15:45.605329",
+  "sla_requirements": {
+    "pdf_conversion_per_page_seconds": 5.0,
+    "image_processing_seconds": 1.0,
+    "batch_throughput_pages_per_minute": 10,
+    "memory_per_page_mb": 100,
+    "total_memory_limit_mb": 8000
+  },
+  "test_summary": {
+    "total_pdfs": 15,
+    "categories": {
+      "layout": 7,
+      "shipping": 4,
+      "financial": 4
+    }
+  },
+  "benchmark_results": [
+    {
+      "filename": "extreme_multi_column.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_bytes": 2399,
+      "benchmark": {
+        "operation": "report_extreme_multi_column.pdf",
+        "iterations": 2,
+        "min_time": 2.0800507627427578e-07,
+        "max_time": 2.749991836026311e-06,
+        "mean_time": 1.4789984561502934e-06,
+        "median_time": 1.4789984561502934e-06,
+        "std_dev": 1.7974560755070832e-06,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "mixed_content_layout.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_bytes": 2093,
+      "benchmark": {
+        "operation": "report_mixed_content_layout.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.333013642579317e-06,
+        "mean_time": 7.290072971954942e-07,
+        "median_time": 7.290072971954942e-07,
+        "std_dev": 8.541939654012102e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "proper_multi_column.pdf",
+      "category": "layout",
+      "complexity": "medium",
+      "file_size_bytes": 2155,
+      "benchmark": {
+        "operation": "report_proper_multi_column.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.2090022210031748e-06,
+        "mean_time": 6.67001586407423e-07,
+        "median_time": 6.67001586407423e-07,
+        "std_dev": 7.665046482601363e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "overlapping_text.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_bytes": 1844,
+      "benchmark": {
+        "operation": "report_overlapping_text.pdf",
+        "iterations": 2,
+        "min_time": 1.6600824892520905e-07,
+        "max_time": 1.167005393654108e-06,
+        "mean_time": 6.665068212896585e-07,
+        "median_time": 6.665068212896585e-07,
+        "std_dev": 7.078118689861764e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "single_column_typography.pdf",
+      "category": "layout",
+      "complexity": "simple",
+      "file_size_bytes": 2147,
+      "benchmark": {
+        "operation": "report_single_column_typography.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.0840012691915035e-06,
+        "mean_time": 6.045011105015874e-07,
+        "median_time": 6.045011105015874e-07,
+        "std_dev": 6.781156275793307e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "tiny_fonts_spacing.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_bytes": 1918,
+      "benchmark": {
+        "operation": "report_tiny_fonts_spacing.pdf",
+        "iterations": 2,
+        "min_time": 8.300412446260452e-08,
+        "max_time": 1.124994014389813e-06,
+        "mean_time": 6.039990694262087e-07,
+        "median_time": 6.039990694262087e-07,
+        "std_dev": 7.367981170953533e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "semantic_table.pdf",
+      "category": "layout",
+      "complexity": "medium",
+      "file_size_bytes": 2225,
+      "benchmark": {
+        "operation": "report_semantic_table.pdf",
+        "iterations": 2,
+        "min_time": 1.66997779160738e-07,
+        "max_time": 1.0829971870407462e-06,
+        "mean_time": 6.249974831007421e-07,
+        "median_time": 6.249974831007421e-07,
+        "std_dev": 6.477093928748161e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "Shipping-Stem-2025-09-30.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_bytes": 472608,
+      "benchmark": {
+        "operation": "report_Shipping-Stem-2025-09-30.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.124994014389813e-06,
+        "mean_time": 6.249974831007421e-07,
+        "median_time": 6.249974831007421e-07,
+        "std_dev": 7.071018756885076e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "shipping-stem-2025-11-13.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_bytes": 516263,
+      "benchmark": {
+        "operation": "report_shipping-stem-2025-11-13.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.7499987734481692e-06,
+        "mean_time": 9.374998626299202e-07,
+        "median_time": 9.374998626299202e-07,
+        "std_dev": 1.1490469790925356e-06,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "shipping_stem-accc-30092025-1.pdf",
+      "category": "shipping",
+      "complexity": "medium",
+      "file_size_bytes": 135964,
+      "benchmark": {
+        "operation": "report_shipping_stem-accc-30092025-1.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.0839867172762752e-06,
+        "mean_time": 6.044938345439732e-07,
+        "median_time": 6.044938345439732e-07,
+        "std_dev": 6.781053378213935e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "CBH Shipping Stem 26092025.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_bytes": 204467,
+      "benchmark": {
+        "operation": "report_CBH Shipping Stem 26092025.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.124994014389813e-06,
+        "mean_time": 6.249974831007421e-07,
+        "median_time": 6.249974831007421e-07,
+        "std_dev": 7.071018756885076e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "Loading-Statement-for-Web-Portal-20250923.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_bytes": 114675,
+      "benchmark": {
+        "operation": "report_Loading-Statement-for-Web-Portal-20250923.pdf",
+        "iterations": 2,
+        "min_time": 1.66997779160738e-07,
+        "max_time": 1.0420044418424368e-06,
+        "mean_time": 6.045011105015874e-07,
+        "median_time": 6.045011105015874e-07,
+        "std_dev": 6.187231447656392e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "Bunge_loadingstatement_2025-09-25.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_bytes": 69334,
+      "benchmark": {
+        "operation": "report_Bunge_loadingstatement_2025-09-25.pdf",
+        "iterations": 2,
+        "min_time": 1.2500095181167126e-07,
+        "max_time": 1.0420044418424368e-06,
+        "mean_time": 5.83502696827054e-07,
+        "median_time": 5.83502696827054e-07,
+        "std_dev": 6.484193861724849e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "2857439.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_bytes": 59891,
+      "benchmark": {
+        "operation": "report_2857439.pdf",
+        "iterations": 2,
+        "min_time": 8.300412446260452e-08,
+        "max_time": 1.0419898899272084e-06,
+        "mean_time": 5.624970071949065e-07,
+        "median_time": 5.624970071949065e-07,
+        "std_dev": 6.781053378213935e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    },
+    {
+      "filename": "document (1).pdf",
+      "category": "financial",
+      "complexity": "simple",
+      "file_size_bytes": 62504,
+      "benchmark": {
+        "operation": "report_document (1).pdf",
+        "iterations": 2,
+        "min_time": 1.66997779160738e-07,
+        "max_time": 1.0829971870407462e-06,
+        "mean_time": 6.249974831007421e-07,
+        "median_time": 6.249974831007421e-07,
+        "std_dev": 6.477093928748161e-07,
+        "throughput": null,
+        "memory_peak_mb": 1054.453125,
+        "metadata": {}
+      }
+    }
+  ],
+  "summary_statistics": {
+    "total_benchmarks": 15,
+    "mean_time": 7.028332523380717e-07,
+    "median_time": 6.249974831007421e-07,
+    "min_time": 5.624970071949065e-07,
+    "max_time": 1.4789984561502934e-06,
+    "std_dev": 2.3264540279848486e-07
+  }
+}

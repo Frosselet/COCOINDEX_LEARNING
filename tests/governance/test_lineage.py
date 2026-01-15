@@ -6,7 +6,7 @@ COLPALI-801: Lineage tracking implementation tests.
 
 import pytest
 from datetime import datetime
-from colpali_engine.governance.lineage import (
+from tatforge.governance.lineage import (
     LineageTracker,
     LineageNode,
     LineageGraph,

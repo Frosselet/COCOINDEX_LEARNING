@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-01-15T07:35:55.146101",
+  "baselines": {
+    "extreme_multi_column.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "mixed_content_layout.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "proper_multi_column.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "overlapping_text.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "single_column_typography.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "tiny_fonts_spacing.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "semantic_table.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "Shipping-Stem-2025-09-30.pdf": {
+      "overall_score": 0.9,
+      "page_count": 4,
+      "image_quality_avg": 1.0
+    },
+    "shipping-stem-2025-11-13.pdf": {
+      "overall_score": 0.9,
+      "page_count": 3,
+      "image_quality_avg": 1.0
+    },
+    "shipping_stem-accc-30092025-1.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "CBH Shipping Stem 26092025.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "Loading-Statement-for-Web-Portal-20250923.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "Bunge_loadingstatement_2025-09-25.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "2857439.pdf": {
+      "overall_score": 0.9,
+      "page_count": 1,
+      "image_quality_avg": 1.0
+    },
+    "document (1).pdf": {
+      "overall_score": 0.9,
+      "page_count": 7,
+      "image_quality_avg": 1.0
+    }
+  }
+}

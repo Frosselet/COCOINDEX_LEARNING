@@ -12,7 +12,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-# Load module directly to avoid colpali_engine package dependencies
+# Load module directly to avoid tatforge package dependencies
 def load_module_directly(module_name: str, file_path: Path):
     """Load a module directly from file."""
     spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -23,7 +23,7 @@ def load_module_directly(module_name: str, file_path: Path):
 
 # Get paths
 project_root = Path(__file__).parent.parent.parent
-lambda_utils_path = project_root / "colpali_engine" / "lambda_utils"
+lambda_utils_path = project_root / "tatforge" / "lambda_utils"
 
 # Load module
 monitoring = load_module_directly(

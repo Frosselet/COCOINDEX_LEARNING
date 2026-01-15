@@ -134,7 +134,7 @@
 
 **File Structure**:
 ```
-colpali_engine/
+tatforge/
 ├── __init__.py                         # Public API exports
 ├── core/
 │   ├── __init__.py
@@ -1689,21 +1689,21 @@ pyarrow>=14.0.0
 **Import**: `from tatforge import VisionPipeline, SchemaManager`
 
 **Acceptance Criteria**:
-- [ ] Package installable via `pip install tatforge`
-- [ ] Clean public API with comprehensive documentation
-- [ ] CLI interface for command-line usage
-- [ ] Jupyter notebook examples with rich output
-- [ ] Integration tests in clean Python environments
-- [ ] Semantic versioning and release workflow
+- [x] Package installable via `uv pip install tatforge` ✅
+- [x] Clean public API with comprehensive documentation ✅
+- [x] CLI interface for command-line usage ✅
+- [x] Jupyter notebook examples with rich output ✅
+- [x] Integration tests in clean Python environments ✅
+- [x] Semantic versioning (0.1.0) ✅
 
 #### Tasks:
 
-#### COLPALI-1201: uv-managed package setup [5 pts]
+#### COLPALI-1201: uv-managed package setup [5 pts] ✅
 **Assignee**: Backend Engineer (Lead)
 **Sprint**: 13
 **Dependencies**: COLPALI-1100 (Documentation complete)
 
-**Description**: Configure the package for PyPI distribution using `uv` as the primary package manager. `uv` is 10-100x faster than pip, written in Rust by Astral (creators of Ruff). Rename package from `colpali_engine` to `tatforge`.
+**Description**: Configure the package for PyPI distribution using `uv` as the primary package manager. `uv` is 10-100x faster than pip, written in Rust by Astral (creators of Ruff). Rename package from `tatforge` to `tatforge`.
 
 **Why uv?**
 - **Speed**: 10-100x faster than pip for installs and resolves
@@ -1812,7 +1812,7 @@ uv lock
 
 ---
 
-#### COLPALI-1202: Public API cleanup and documentation [5 pts]
+#### COLPALI-1202: Public API cleanup and documentation [5 pts] ✅
 **Assignee**: Backend Engineer
 **Sprint**: 13
 **Dependencies**: COLPALI-1201
@@ -1892,7 +1892,7 @@ __all__ = [
 
 ---
 
-#### COLPALI-1203: CLI interface [3 pts]
+#### COLPALI-1203: CLI interface [3 pts] ✅
 **Assignee**: Backend Engineer
 **Sprint**: 13-14
 **Dependencies**: COLPALI-1202
@@ -1979,7 +1979,7 @@ def serve(port, host):
 
 ---
 
-#### COLPALI-1204: Jupyter notebook examples [5 pts]
+#### COLPALI-1204: Jupyter notebook examples [5 pts] ✅
 **Assignee**: Backend Engineer
 **Sprint**: 14
 **Dependencies**: COLPALI-1202
@@ -2060,7 +2060,7 @@ def display_result(result: ExtractionResult):
 
 ---
 
-#### COLPALI-1205: Package integration testing with uv [3 pts]
+#### COLPALI-1205: Package integration testing with uv [3 pts] ✅
 **Assignee**: QA Engineer
 **Sprint**: 14
 **Dependencies**: COLPALI-1201, COLPALI-1202, COLPALI-1203

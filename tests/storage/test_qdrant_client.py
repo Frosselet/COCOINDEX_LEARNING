@@ -31,10 +31,10 @@ mock_modules = {
     'torch.nn': MagicMock(),
     'torch.nn.functional': MagicMock(),
     'transformers': MagicMock(),
-    'colpali_engine.models': MagicMock(),
-    'colpali_engine.vision': MagicMock(),
-    'colpali_engine.extraction': MagicMock(),
-    'colpali_engine.core': MagicMock()
+    'tatforge.models': MagicMock(),
+    'tatforge.vision': MagicMock(),
+    'tatforge.extraction': MagicMock(),
+    'tatforge.core': MagicMock()
 }
 
 with patch.dict('sys.modules', mock_modules):
@@ -42,7 +42,7 @@ with patch.dict('sys.modules', mock_modules):
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "qdrant_client",
-        project_root / "colpali_engine" / "storage" / "qdrant_client.py"
+        project_root / "tatforge" / "storage" / "qdrant_client.py"
     )
     qdrant_module = importlib.util.module_from_spec(spec)
 

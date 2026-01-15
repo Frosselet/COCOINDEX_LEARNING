@@ -7,8 +7,8 @@ COLPALI-701: Canonical data formatter implementation tests.
 import pytest
 import asyncio
 from datetime import datetime
-from colpali_engine.outputs.canonical import CanonicalFormatter
-from colpali_engine.extraction.models import CanonicalData
+from tatforge.outputs.canonical import CanonicalFormatter
+from tatforge.extraction.models import CanonicalData
 
 
 class TestCanonicalFormatter:

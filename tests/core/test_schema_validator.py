@@ -8,7 +8,7 @@ with detailed error messages, fix suggestions, and migration support.
 import pytest
 from typing import Dict, Any
 
-from colpali_engine.core.schema_validator import (
+from tatforge.core.schema_validator import (
     SchemaValidator,
     ValidationSeverity,
     CompatibilityLevel,
