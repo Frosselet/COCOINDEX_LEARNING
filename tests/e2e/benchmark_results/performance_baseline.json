@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-01-14T06:55:35.530889",
+  "baselines": {
+    "extreme_multi_column.pdf": {
+      "mean_time": 4.555999718528862e-06,
+      "std_dev": 5.094774655991124e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "mixed_content_layout.pdf": {
+      "mean_time": 1.1109999225785334e-06,
+      "std_dev": 8.421479636536086e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "proper_multi_column.pdf": {
+      "mean_time": 1.624999943790802e-06,
+      "std_dev": 1.5276344158211076e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "overlapping_text.pdf": {
+      "mean_time": 1.5696665892998378e-06,
+      "std_dev": 1.2778578426130658e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "single_column_typography.pdf": {
+      "mean_time": 8.336667936722127e-07,
+      "std_dev": 6.224727976105965e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "tiny_fonts_spacing.pdf": {
+      "mean_time": 8.469999860002039e-07,
+      "std_dev": 5.90119412742327e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "semantic_table.pdf": {
+      "mean_time": 8.193334603371719e-07,
+      "std_dev": 6.013105863878547e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "Shipping-Stem-2025-09-30.pdf": {
+      "mean_time": 3.7636667305681235e-06,
+      "std_dev": 2.8004988094816034e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "shipping-stem-2025-11-13.pdf": {
+      "mean_time": 1.1193999853276182e-05,
+      "std_dev": 1.806279230732335e-05,
+      "memory_peak_mb": 328.03125
+    },
+    "shipping_stem-accc-30092025-1.pdf": {
+      "mean_time": 1.0553336930267203e-06,
+      "std_dev": 7.72858811884741e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "CBH Shipping Stem 26092025.pdf": {
+      "mean_time": 7.920001128998896e-07,
+      "std_dev": 5.416543944359577e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "Loading-Statement-for-Web-Portal-20250923.pdf": {
+      "mean_time": 6.652667252637912e-06,
+      "std_dev": 5.981425553514952e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "Bunge_loadingstatement_2025-09-25.pdf": {
+      "mean_time": 3.083666949047862e-06,
+      "std_dev": 3.0925266289757227e-06,
+      "memory_peak_mb": 328.03125
+    },
+    "2857439.pdf": {
+      "mean_time": 9.163334956004595e-07,
+      "std_dev": 6.222723815686627e-07,
+      "memory_peak_mb": 328.03125
+    },
+    "document (1).pdf": {
+      "mean_time": 8.469996828353032e-07,
+      "std_dev": 6.266790339322168e-07,
+      "memory_peak_mb": 328.03125
+    }
+  }
+}
