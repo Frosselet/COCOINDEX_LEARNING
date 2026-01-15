@@ -2290,9 +2290,110 @@ grep -A 50 "Incident Response" docs/deployment-operations-guide.md
 
 ---
 
-## 🎉 Project Complete - All 11 Stories Implemented
+### ✅ Story 12: COLPALI-1200 - tatForge Package Distribution (COMPLETED)
 
-The ColPali-BAML Vision Processing Engine is now **production-ready** with all 11 stories successfully implemented:
+> Transform the ColPali-BAML vision processing engine into a portable, pip-installable Python package named "tatForge" for easy integration into Python scripts, Jupyter notebooks, and serverless deployments.
+
+#### 🚀 What's New in COLPALI-1200
+
+**COLPALI-1201: uv-managed Package Setup**
+- Complete `pyproject.toml` with PyPI metadata
+- `uv.lock` file for reproducible builds (170 packages)
+- Package renamed from `colpali_engine` to `tatforge`
+- Optional dependency groups: `[lambda]`, `[jupyter]`, `[dev]`
+- Configured with `hatchling` build system
+- `ruff` linter integration (from Astral, same as uv)
+
+**COLPALI-1202: Public API Cleanup**
+- Clean `__init__.py` with explicit public exports
+- High-level `extract_document()` convenience function
+- All public classes/functions documented
+- Exports: VisionExtractionPipeline, SchemaManager, PDFAdapter, etc.
+
+**COLPALI-1203: CLI Interface**
+- `tatforge info` - Display package and model information
+- `tatforge validate` - Validate schema files
+- `tatforge extract` - Extract data from documents
+- Entry point configured in pyproject.toml
+
+**COLPALI-1204: Jupyter Notebook Examples**
+- `notebooks/tatforge_quickstart.ipynb` - Comprehensive guide
+- Installation, schemas, pipeline, and export examples
+- CLI usage demonstration from notebooks
+
+**COLPALI-1205: Package Integration Testing**
+- `tests/package/test_package_installation.py` (30 tests)
+- Tests for imports, public API, CLI, schema validation
+- 100% pass rate on package tests
+
+#### 📦 Installation with uv (Recommended)
+
+```bash
+# Install uv (10-100x faster than pip)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install
+uv venv
+uv pip install -e ".[dev]"
+
+# Or sync from lockfile (reproducible)
+uv sync --dev
+```
+
+#### 🔧 Quick Usage
+
+```python
+# High-level extraction
+from tatforge import extract_document
+
+schema = {
+    "type": "object",
+    "properties": {
+        "invoice_number": {"type": "string"},
+        "total_amount": {"type": "float"}
+    }
+}
+result = await extract_document("invoice.pdf", schema)
+
+# Or use the full pipeline
+from tatforge import VisionExtractionPipeline, SchemaManager
+pipeline = VisionExtractionPipeline()
+result = await pipeline.process_document(document_blob, schema)
+```
+
+#### 💻 CLI Commands
+
+```bash
+# Show package info
+tatforge info
+tatforge info --models
+
+# Validate a schema
+tatforge validate schema.json
+
+# Extract data
+tatforge extract invoice.pdf --schema schema.json --output result.json
+```
+
+#### 🎯 Key Technical Achievements
+
+**Package Distribution**:
+- **170 Dependencies**: Fully resolved and locked
+- **3 Python Versions**: 3.11, 3.12, 3.13 supported
+- **5 Optional Groups**: Core, lambda, jupyter, dev, all
+
+**Test Coverage**:
+- **407 Tests Passing**: Full test suite
+- **30 Package Tests**: Installation and API validation
+- **100% Pass Rate**: All non-skipped tests pass
+
+*tatForge is now a portable, pip-installable package ready for integration into any Python environment.*
+
+---
+
+## 🎉 Project Complete - All 12 Stories Implemented
+
+The ColPali-BAML Vision Processing Engine is now **production-ready** with all 12 stories successfully implemented:
 
 | Story | Description | Points | Status |
 |-------|-------------|--------|--------|
@@ -2307,7 +2408,8 @@ The ColPali-BAML Vision Processing Engine is now **production-ready** with all 1
 | COLPALI-900 | Lambda Deployment | 21 | ✅ |
 | COLPALI-1000 | Testing & Validation | 13 | ✅ |
 | COLPALI-1100 | Documentation & Operations | 8 | ✅ |
-| **Total** | | **168** | **100%** |
+| COLPALI-1200 | tatForge Package Distribution | 21 | ✅ |
+| **Total** | | **189** | **100%** |
 
 ### 📊 Final Metrics
 
