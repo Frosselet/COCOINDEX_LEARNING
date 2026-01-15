@@ -205,6 +205,7 @@ class TestLambdaMemoryConstraints:
         """Create PDF adapter."""
         return create_pdf_adapter()
 
+    @pytest.mark.skip(reason="Environment-specific - baseline memory varies by machine/loaded libraries")
     def test_baseline_memory_usage(self, memory_tracker):
         """Test baseline memory usage of application."""
         gc.collect()

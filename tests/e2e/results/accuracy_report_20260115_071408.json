@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-01-15T07:14:08.430814",
+  "total_documents": 15,
+  "successful_conversions": 15,
+  "failed_conversions": 0,
+  "overall_accuracy": 0.9,
+  "metrics_by_category": {
+    "layout": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
+      "true_positives": 7,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "true_negatives": 0
+    },
+    "shipping": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
+      "true_positives": 4,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "true_negatives": 0
+    },
+    "financial": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "accuracy": 1.0,
+      "true_positives": 4,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "true_negatives": 0
+    }
+  },
+  "recommendations": []
+}

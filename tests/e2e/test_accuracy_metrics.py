@@ -699,9 +699,9 @@ class TestRegressionDetection:
     """Test quality regression detection."""
 
     @pytest.fixture
-    def accuracy_baseline_file(self, benchmark_results_dir) -> Path:
+    def accuracy_baseline_file(self, test_results_directory) -> Path:
         """Path to accuracy baseline file."""
-        return benchmark_results_dir / "accuracy_baseline.json"
+        return test_results_directory / "accuracy_baseline.json"
 
     def test_save_accuracy_baseline(
         self,
