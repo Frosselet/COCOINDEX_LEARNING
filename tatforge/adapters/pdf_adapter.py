@@ -11,7 +11,7 @@ import io
 import logging
 import time
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 
 import PyPDF2
@@ -57,14 +57,14 @@ class PDFAdapter(BaseDocumentAdapter):
 
     async def convert_to_frames(
         self,
-        content: bytes,
+        content: Union[bytes, Path, str],
         config: Optional[ConversionConfig] = None
     ) -> List[Image.Image]:
         """
         Convert PDF content to image frames.
 
         Args:
-            content: Raw PDF bytes
+            content: Raw PDF bytes, or path to PDF file (Path or str)
             config: Optional conversion configuration
 
         Returns:
@@ -76,6 +76,14 @@ class PDFAdapter(BaseDocumentAdapter):
         config = config or ConversionConfig()
 
         try:
+            # Handle file path input - convert to bytes
+            if isinstance(content, (str, Path)):
+                file_path = Path(content)
+                if not file_path.exists():
+                    raise DocumentProcessingError(f"PDF file not found: {file_path}")
+                logger.info(f"Reading PDF from file: {file_path}")
+                content = file_path.read_bytes()
+
             # Validate PDF format first
             if not self.validate_format(content):
                 raise DocumentProcessingError("Invalid PDF format")
