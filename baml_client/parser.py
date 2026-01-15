@@ -24,16 +24,16 @@ class LlmResponseParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def ExtractDocumentFields(
+    def ExtractDocumentFieldsFromPDF(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> str:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractDocumentFields", llm_response=llm_response, mode="request")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractDocumentFieldsFromPDF", llm_response=llm_response, mode="request")
         return typing.cast(str, __result__)
 
-    def ExtractFromDocumentImage(
+    def ExtractFromPDF(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> types.DocumentExtractionResult:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractFromDocumentImage", llm_response=llm_response, mode="request")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractFromPDF", llm_response=llm_response, mode="request")
         return typing.cast(types.DocumentExtractionResult, __result__)
 
     def ExtractResume(
@@ -50,16 +50,16 @@ class LlmStreamParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
-    def ExtractDocumentFields(
+    def ExtractDocumentFieldsFromPDF(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> str:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractDocumentFields", llm_response=llm_response, mode="stream")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractDocumentFieldsFromPDF", llm_response=llm_response, mode="stream")
         return typing.cast(str, __result__)
 
-    def ExtractFromDocumentImage(
+    def ExtractFromPDF(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> stream_types.DocumentExtractionResult:
-        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractFromDocumentImage", llm_response=llm_response, mode="stream")
+        __result__ = self.__options.merge_options(baml_options).parse_response(function_name="ExtractFromPDF", llm_response=llm_response, mode="stream")
         return typing.cast(stream_types.DocumentExtractionResult, __result__)
 
     def ExtractResume(

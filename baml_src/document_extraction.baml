@@ -1,5 +1,5 @@
 // Generic document extraction function for vision-based processing
-// This function extracts structured data from document images based on a schema
+// This function extracts structured data from PDF documents using native PDF support
 
 // Generic extraction result - flexible key-value pairs
 class ExtractionField {
@@ -14,19 +14,19 @@ class DocumentExtractionResult {
   extraction_notes string?
 }
 
-// Function to extract data from a document image
-function ExtractFromDocumentImage(
-  document_image: image,
+// Function to extract data from a PDF document using native PDF support
+function ExtractFromPDF(
+  document: pdf,
   schema_description: string,
   field_names: string[]
 ) -> DocumentExtractionResult {
-  // Use a vision-capable model via chat completions API
+  // Use GPT-4o which supports PDF/image inputs
   client "openai/gpt-4o"
   prompt #"
-    You are a document extraction expert. Analyze this document image and extract the requested information.
+    You are a document extraction expert. Analyze this document and extract the requested information.
 
-    Document Image:
-    {{ document_image }}
+    Document:
+    {{ document }}
 
     Schema Description:
     {{ schema_description }}
@@ -35,7 +35,7 @@ function ExtractFromDocumentImage(
     {{ field_names }}
 
     Instructions:
-    1. Carefully examine the document image
+    1. Carefully examine the document
     2. Extract values for each requested field
     3. If a field is not found or unclear, set its value to "NOT_FOUND"
     4. Provide confidence scores (0.0 to 1.0) when possible
@@ -46,16 +46,16 @@ function ExtractFromDocumentImage(
 }
 
 // Simpler extraction function that returns raw JSON string for flexibility
-function ExtractDocumentFields(
-  document_image: image,
+function ExtractDocumentFieldsFromPDF(
+  document: pdf,
   extraction_prompt: string
 ) -> string {
   client "openai/gpt-4o"
   prompt #"
-    Analyze this document image and extract the requested information.
+    Analyze this document and extract the requested information.
 
-    Document Image:
-    {{ document_image }}
+    Document:
+    {{ document }}
 
     {{ extraction_prompt }}
 
@@ -63,13 +63,14 @@ function ExtractDocumentFields(
   "#
 }
 
-// Test with a sample extraction
+// Test with a sample extraction (note: test requires actual PDF file)
 test sample_extraction {
-  functions [ExtractDocumentFields]
+  functions [ExtractDocumentFieldsFromPDF]
   args {
-    document_image {
-      url "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1200px-PDF_file_icon.svg.png"
+    document {
+      // Use a base64-encoded PDF or file path for testing
+      file "../../pdfs/sample.pdf"
     }
-    extraction_prompt "Extract any text visible in this image. Return as JSON with a 'text' field."
+    extraction_prompt "Extract any text visible in this document. Return as JSON with a 'text' field."
   }
 }
