@@ -1481,10 +1481,11 @@ pyarrow>=14.0.0
 
 ---
 
-### Story 11: COLPALI-1100 - Documentation & Operations
+### Story 11: COLPALI-1100 - Documentation & Operations ✅ **COMPLETED**
 **Points**: 8
 **Sprint**: 12
 **Priority**: Medium
+**Status**: Complete documentation package delivered ✅
 
 **Description**: Create comprehensive documentation package including architectural playbook, operational procedures, and developer onboarding materials to enable team collaboration and knowledge transfer.
 
@@ -1497,7 +1498,7 @@ pyarrow>=14.0.0
 
 #### Tasks:
 
-#### COLPALI-1101: Write architectural playbook documentation [3 pts]
+#### COLPALI-1101: Write architectural playbook documentation [3 pts] ✅
 **Assignee**: Technical Writer + Backend Engineer (Lead)
 **Sprint**: 12
 **Dependencies**: All major stories complete
@@ -1521,14 +1522,14 @@ pyarrow>=14.0.0
 - Troubleshooting procedures
 
 **Definition of Done**:
-- [ ] Architectural playbook complete
-- [ ] Diagrams included
-- [ ] Code examples working
-- [ ] Review completed
+- [x] Architectural playbook complete ✅
+- [x] Diagrams included (Mermaid flowcharts) ✅
+- [x] Code examples working ✅
+- [x] Review completed ✅
 
 ---
 
-#### COLPALI-1102: Create deployment and operations guides [3 pts]
+#### COLPALI-1102: Create deployment and operations guides [3 pts] ✅
 **Assignee**: DevOps Engineer + Technical Writer
 **Sprint**: 12
 **Dependencies**: COLPALI-900 (Lambda Deployment)
@@ -1542,6 +1543,8 @@ pyarrow>=14.0.0
 - Scaling and capacity planning guidance
 - Incident response and troubleshooting procedures
 
+**Deliverable**: `/docs/deployment-operations-guide.md`
+
 **Technical Implementation**:
 - Include Docker commands
 - AWS CLI examples
@@ -1550,14 +1553,22 @@ pyarrow>=14.0.0
 - Troubleshooting procedures
 
 **Definition of Done**:
-- [ ] Deployment guides complete
-- [ ] Operations procedures documented
-- [ ] Runbooks created
-- [ ] Review completed
+- [x] Deployment guides complete ✅
+- [x] Operations procedures documented ✅
+- [x] Runbooks created (daily, weekly, incident response) ✅
+- [x] Review completed ✅
+
+**Deliverables**:
+- Local development deployment (Docker Compose)
+- AWS Lambda deployment (ECR, API Gateway)
+- CloudWatch dashboard configuration
+- Backup/recovery procedures
+- Scaling guidelines
+- SEV-1/SEV-2 incident response runbooks
 
 ---
 
-#### COLPALI-1103: Build developer getting started documentation [2 pts]
+#### COLPALI-1103: Build developer getting started documentation [2 pts] ✅
 **Assignee**: Technical Writer + Backend Engineer
 **Sprint**: 12
 **Dependencies**: COLPALI-1000 (Testing)
@@ -1571,6 +1582,8 @@ pyarrow>=14.0.0
 - API usage examples and tutorials
 - Testing and debugging guidance
 
+**Deliverable**: `/docs/getting-started.md`
+
 **Technical Implementation**:
 - Include Jupyter notebook examples
 - API client code samples
@@ -1579,10 +1592,20 @@ pyarrow>=14.0.0
 - Contribution guidelines
 
 **Definition of Done**:
-- [ ] Getting started guide complete
-- [ ] Examples working
-- [ ] Workflow documented
-- [ ] Review completed
+- [x] Getting started guide complete ✅
+- [x] Examples working (8+ code examples) ✅
+- [x] Workflow documented ✅
+- [x] Review completed ✅
+
+**Deliverables**:
+- 5-minute quick start
+- Docker & local development setup
+- Complete project structure overview
+- API usage examples (basic, schema, Qdrant, output)
+- Testing guide with fixtures
+- Contribution guidelines and code style
+- Debugging and troubleshooting section
+- Common patterns (async, factory, batch, config)
 
 ---
 
@@ -1645,6 +1668,495 @@ pyarrow>=14.0.0
 - Monitoring and alerting fully operational
 - Complete documentation package delivered
 - Team onboarding process validated
+
+---
+
+## Phase 2: tatForge Package Distribution
+
+> **New Epic**: Transform the ColPali-BAML engine into a portable, pip-installable Python package named **tatForge** for easy integration into scripts, notebooks, and serverless deployments.
+
+---
+
+### Story 12: COLPALI-1200 - tatForge Package Distribution & Portability
+**Points**: 21
+**Sprint**: 13-14
+**Priority**: High
+
+**Description**: Transform the ColPali-BAML vision processing engine into a portable, pip-installable Python package named "tatForge". This enables easy integration into Python scripts, Jupyter notebooks, and serverless deployments without complex setup.
+
+**Package Name**: `tatforge`
+**PyPI Name**: `tatforge`
+**Import**: `from tatforge import VisionPipeline, SchemaManager`
+
+**Acceptance Criteria**:
+- [ ] Package installable via `pip install tatforge`
+- [ ] Clean public API with comprehensive documentation
+- [ ] CLI interface for command-line usage
+- [ ] Jupyter notebook examples with rich output
+- [ ] Integration tests in clean Python environments
+- [ ] Semantic versioning and release workflow
+
+#### Tasks:
+
+#### COLPALI-1201: PyPI-ready packaging setup [5 pts]
+**Assignee**: Backend Engineer (Lead)
+**Sprint**: 13
+**Dependencies**: COLPALI-1100 (Documentation complete)
+
+**Description**: Configure the package for PyPI distribution with proper metadata, versioning, build system, and dependency management. Rename package from `colpali_engine` to `tatforge`.
+
+**Acceptance Criteria**:
+- Complete pyproject.toml with all PyPI metadata
+- Semantic versioning (0.1.0 initial release)
+- Build system configured (hatchling or setuptools)
+- MANIFEST.in for package data (BAML files, etc.)
+- Optional dependency groups: [lambda], [jupyter], [dev]
+- Local pip install tested successfully
+- README formatted for PyPI display
+
+**Technical Implementation**:
+```toml
+# pyproject.toml
+[project]
+name = "tatforge"
+version = "0.1.0"
+description = "AI-powered document extraction - forge structured data from unstructured documents"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "TAT Team"}]
+keywords = ["document-extraction", "vision-ai", "colpali", "baml", "structured-data"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.1.0",
+    "transformers>=4.36.0",
+    "Pillow>=10.0.0",
+    "pydantic>=2.5.0",
+    "qdrant-client>=1.7.0",
+    "baml-py>=0.215.2",
+]
+
+[project.optional-dependencies]
+lambda = ["psutil>=5.9.0"]
+jupyter = ["ipywidgets>=8.0.0", "matplotlib>=3.8.0"]
+dev = ["pytest>=7.0.0", "black>=23.0.0", "mypy>=1.0.0"]
+
+[project.scripts]
+tatforge = "tatforge.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+**Definition of Done**:
+- [ ] pyproject.toml complete with all metadata
+- [ ] Package renamed to tatforge
+- [ ] Local pip install works: `pip install -e .`
+- [ ] Build artifacts created: `python -m build`
+- [ ] Optional dependencies tested
+
+---
+
+#### COLPALI-1202: Public API cleanup and documentation [5 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 13
+**Dependencies**: COLPALI-1201
+
+**Description**: Clean up and document the public API, ensuring clear separation between public and private interfaces. Create type stubs and comprehensive docstrings for all public classes and functions.
+
+**Acceptance Criteria**:
+- Clean `__init__.py` with explicit public exports
+- All public classes/functions have Google-style docstrings
+- Type hints on all public interfaces
+- Private modules prefixed with underscore
+- API reference documentation generated
+- Usage examples in docstrings
+
+**Public API Design**:
+```python
+# tatforge/__init__.py
+"""
+tatForge - AI-powered document extraction.
+
+Forge structured data from unstructured documents using vision AI.
+
+Quick Start:
+    >>> from tatforge import VisionPipeline
+    >>> pipeline = VisionPipeline()
+    >>> result = await pipeline.process("document.pdf", schema={...})
+    >>> print(result.data)
+"""
+
+__version__ = "0.1.0"
+
+# Core pipeline
+from .core.pipeline import VisionPipeline
+from .core.schema import SchemaManager, Schema
+
+# Document processing
+from .adapters import PDFAdapter, ImageAdapter, HTMLAdapter
+
+# Storage
+from .storage import QdrantStorage, VectorStore
+
+# Output
+from .output import CanonicalResult, ShapedResult, Exporter
+
+# Types
+from .types import ExtractionResult, DocumentMetadata, PatchEmbedding
+
+__all__ = [
+    # Core
+    "VisionPipeline",
+    "SchemaManager",
+    "Schema",
+    # Adapters
+    "PDFAdapter",
+    "ImageAdapter",
+    "HTMLAdapter",
+    # Storage
+    "QdrantStorage",
+    "VectorStore",
+    # Output
+    "CanonicalResult",
+    "ShapedResult",
+    "Exporter",
+    # Types
+    "ExtractionResult",
+    "DocumentMetadata",
+    "PatchEmbedding",
+]
+```
+
+**Definition of Done**:
+- [ ] Public API defined in __init__.py
+- [ ] All public classes documented
+- [ ] Type hints complete
+- [ ] Private modules marked with underscore
+- [ ] API examples tested
+
+---
+
+#### COLPALI-1203: CLI interface [3 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 13-14
+**Dependencies**: COLPALI-1202
+
+**Description**: Create a command-line interface for tatForge that enables processing documents, starting a local server, and getting system information without writing Python code.
+
+**Acceptance Criteria**:
+- `tatforge process` - Process single document
+- `tatforge batch` - Process multiple documents
+- `tatforge serve` - Start local REST API server
+- `tatforge info` - Display version and configuration
+- `tatforge validate` - Validate schema file
+- Colored output and progress bars
+- Error handling with helpful messages
+
+**CLI Design**:
+```bash
+# Process single document
+tatforge process invoice.pdf --schema invoice.json --output result.json
+
+# Process with options
+tatforge process document.pdf \
+  --schema schema.json \
+  --output result.parquet \
+  --format parquet \
+  --dpi 300 \
+  --verbose
+
+# Batch processing
+tatforge batch ./documents/ --schema schema.json --output ./results/
+
+# Start local server
+tatforge serve --port 8000 --host 0.0.0.0
+
+# Get info
+tatforge info
+# Output:
+# tatForge v0.1.0
+# Python: 3.13.0
+# PyTorch: 2.1.0
+# Model: vidore/colqwen2-v0.1 (not loaded)
+# Qdrant: localhost:6333 (connected)
+
+# Validate schema
+tatforge validate schema.json
+# Output: ✓ Schema is valid BAML-compatible
+```
+
+**Technical Implementation**:
+```python
+# tatforge/cli.py
+import click
+
+@click.group()
+@click.version_option(version=__version__)
+def main():
+    """tatForge - Forge structured data from documents."""
+    pass
+
+@main.command()
+@click.argument("document", type=click.Path(exists=True))
+@click.option("--schema", "-s", required=True, help="JSON schema file")
+@click.option("--output", "-o", default="result.json", help="Output file")
+@click.option("--format", "-f", type=click.Choice(["json", "csv", "parquet"]))
+@click.option("--verbose", "-v", is_flag=True)
+def process(document, schema, output, format, verbose):
+    """Process a document and extract structured data."""
+    ...
+
+@main.command()
+@click.option("--port", "-p", default=8000)
+@click.option("--host", "-h", default="localhost")
+def serve(port, host):
+    """Start local REST API server."""
+    ...
+```
+
+**Definition of Done**:
+- [ ] CLI entry point configured
+- [ ] All commands implemented
+- [ ] Help text complete
+- [ ] Error handling tested
+- [ ] Progress bars working
+
+---
+
+#### COLPALI-1204: Jupyter notebook examples [5 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 14
+**Dependencies**: COLPALI-1202
+
+**Description**: Create comprehensive Jupyter notebook examples demonstrating all major features of tatForge, with rich output displays and interactive widgets where appropriate.
+
+**Acceptance Criteria**:
+- 5 example notebooks covering all use cases
+- Rich HTML output for extraction results
+- Progress indicators for long operations
+- Clear markdown explanations
+- All notebooks tested and working
+- Notebooks included in package distribution
+
+**Notebook Structure**:
+```
+notebooks/
+├── 01_Quick_Start.ipynb           # 5-minute introduction
+│   ├── Installation
+│   ├── Basic document processing
+│   ├── Understanding results
+│   └── Next steps
+│
+├── 02_Schema_Design.ipynb         # Schema creation guide
+│   ├── JSON Schema basics
+│   ├── Complex nested schemas
+│   ├── BAML generation preview
+│   └── Validation and testing
+│
+├── 03_Document_Processing.ipynb   # Deep dive on processing
+│   ├── PDF processing options
+│   ├── Image quality settings
+│   ├── Multi-page handling
+│   └── Batch processing
+│
+├── 04_Vector_Search.ipynb         # Qdrant integration
+│   ├── Storing embeddings
+│   ├── Semantic search
+│   ├── Similarity queries
+│   └── Collection management
+│
+└── 05_Production_Deployment.ipynb # Deployment guide
+    ├── Lambda configuration
+    ├── API integration
+    ├── Monitoring setup
+    └── Scaling considerations
+```
+
+**Rich Output Example**:
+```python
+# tatforge/jupyter.py
+from IPython.display import display, HTML
+
+def display_result(result: ExtractionResult):
+    """Display extraction result with rich HTML formatting."""
+    html = f"""
+    <div style="border: 1px solid #ddd; padding: 16px; border-radius: 8px;">
+        <h3>🔨 tatForge Extraction Result</h3>
+        <table>
+            <tr><td><b>Document:</b></td><td>{result.source}</td></tr>
+            <tr><td><b>Pages:</b></td><td>{result.page_count}</td></tr>
+            <tr><td><b>Confidence:</b></td><td>{result.confidence:.1%}</td></tr>
+            <tr><td><b>Processing Time:</b></td><td>{result.duration:.2f}s</td></tr>
+        </table>
+        <h4>Extracted Data:</h4>
+        <pre>{json.dumps(result.data, indent=2)}</pre>
+    </div>
+    """
+    display(HTML(html))
+```
+
+**Definition of Done**:
+- [ ] 5 notebooks created and tested
+- [ ] Rich output displays working
+- [ ] All code cells execute successfully
+- [ ] Notebooks included in package
+- [ ] Documentation links added
+
+---
+
+#### COLPALI-1205: Package integration testing [3 pts]
+**Assignee**: QA Engineer
+**Sprint**: 14
+**Dependencies**: COLPALI-1201, COLPALI-1202, COLPALI-1203
+
+**Description**: Create comprehensive integration tests that validate the package works correctly when installed via pip in a clean Python environment, across different Python versions.
+
+**Acceptance Criteria**:
+- Tests run in clean virtual environment
+- Python 3.11, 3.12, 3.13 compatibility verified
+- Import tests for all public modules
+- Basic functionality tests
+- CLI command tests
+- CI/CD pipeline for automated testing
+
+**Test Matrix**:
+```yaml
+# .github/workflows/test-package.yml
+name: Package Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: pip install -e .[dev]
+
+      - name: Test imports
+        run: python -c "from tatforge import VisionPipeline; print('OK')"
+
+      - name: Run tests
+        run: pytest tests/package/ -v
+
+      - name: Test CLI
+        run: tatforge info
+```
+
+**Integration Test Suite**:
+```python
+# tests/package/test_installation.py
+"""Package installation and import tests."""
+
+def test_package_imports():
+    """Test all public imports work."""
+    from tatforge import VisionPipeline
+    from tatforge import SchemaManager
+    from tatforge import PDFAdapter
+    from tatforge import QdrantStorage
+    assert VisionPipeline is not None
+
+def test_version_available():
+    """Test version is accessible."""
+    import tatforge
+    assert hasattr(tatforge, "__version__")
+    assert tatforge.__version__ == "0.1.0"
+
+def test_cli_available():
+    """Test CLI is installed."""
+    import subprocess
+    result = subprocess.run(["tatforge", "info"], capture_output=True)
+    assert result.returncode == 0
+```
+
+**Definition of Done**:
+- [ ] Clean environment tests pass
+- [ ] All Python versions tested
+- [ ] CI/CD pipeline configured
+- [ ] Import tests complete
+- [ ] CLI tests working
+
+---
+
+### Story 12 Summary
+
+**Total Points**: 21
+**Sprint**: 13-14
+**Deliverables**:
+- `tatforge` pip-installable package
+- Clean public API with documentation
+- CLI interface (`tatforge process`, `tatforge serve`)
+- 5 Jupyter notebook examples
+- CI/CD pipeline for package releases
+
+**Usage After Completion**:
+```bash
+# Install
+pip install tatforge
+
+# CLI usage
+tatforge process document.pdf --schema schema.json
+
+# Python usage
+from tatforge import VisionPipeline
+result = await VisionPipeline().process("doc.pdf", schema)
+
+# Jupyter
+from tatforge.jupyter import display_result
+display_result(result)
+```
+
+---
+
+## Updated Project Summary
+
+### Timeline and Milestones
+
+**Phase 1: Core Engine (Completed)**
+- Sprint 1-2: Foundation & Infrastructure (Stories 1-2)
+- Sprint 3-5: Core Vision Processing (Stories 3-4)
+- Sprint 6-8: Schema System & Extraction (Stories 5-6)
+- Sprint 9-10: Output Management & Governance (Stories 7-8)
+- Sprint 11-12: Deployment & Validation (Stories 9-11)
+
+**Phase 2: Package Distribution (New)**
+- Sprint 13-14: tatForge Package (Story 12)
+
+### Updated Story Point Summary
+
+| Story | Description | Points | Status |
+|-------|-------------|--------|--------|
+| COLPALI-100 | Core Infrastructure | 13 | ✅ Complete |
+| COLPALI-200 | Document Processing | 21 | ✅ Complete |
+| COLPALI-300 | ColPali Vision | 21 | ✅ Complete |
+| COLPALI-400 | Qdrant Storage | 16 | ✅ Complete |
+| COLPALI-500 | BAML Schema | 21 | ✅ Complete |
+| COLPALI-600 | Extraction | 13 | ✅ Complete |
+| COLPALI-700 | Output Management | 13 | ✅ Complete |
+| COLPALI-800 | Governance | 8 | ✅ Complete |
+| COLPALI-900 | Lambda Deployment | 21 | ✅ Complete |
+| COLPALI-1000 | Testing | 13 | ✅ Complete |
+| COLPALI-1100 | Documentation | 8 | ✅ Complete |
+| **COLPALI-1200** | **tatForge Package** | **21** | 🆕 New |
+| **Total** | | **189** | |
 
 ---
 
