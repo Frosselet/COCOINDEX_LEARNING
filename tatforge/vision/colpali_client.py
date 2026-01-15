@@ -466,9 +466,17 @@ class ColPaliClient:
 
             # Run dummy inference
             with torch.no_grad():
-                inputs = self.processor([dummy_image], return_tensors="pt")
-                if self.model.device.type == "cuda":
-                    inputs = {k: v.cuda() if hasattr(v, 'cuda') else v for k, v in inputs.items()}
+                # Use appropriate processor method based on processor type
+                if hasattr(self.processor, 'process_images'):
+                    # ColQwen2 processor
+                    inputs = self.processor.process_images([dummy_image])
+                else:
+                    # Standard ColPali processor
+                    inputs = self.processor([dummy_image], return_tensors="pt")
+
+                # Move to device
+                device = next(self.model.parameters()).device
+                inputs = {k: v.to(device) if hasattr(v, 'to') else v for k, v in inputs.items()}
 
                 # Forward pass
                 _ = self.model(**inputs)
@@ -523,11 +531,17 @@ class ColPaliClient:
             return []
 
         try:
-            # Preprocess images for ColPali
+            # Preprocess images for ColPali/ColQwen2
             logger.debug(f"Processing batch of {len(batch_images)} images")
 
-            # Use processor to prepare inputs
-            inputs = self.processor(batch_images, return_tensors="pt")
+            # ColQwen2Processor requires both images and text
+            # Use process_images method if available (ColQwen2), otherwise use __call__ (ColPali)
+            if hasattr(self.processor, 'process_images'):
+                # ColQwen2 processor - use process_images method for image-only processing
+                inputs = self.processor.process_images(batch_images)
+            else:
+                # Standard ColPali processor
+                inputs = self.processor(batch_images, return_tensors="pt")
 
             # Move inputs to model device
             device = next(self.model.parameters()).device
@@ -692,7 +706,12 @@ class ColPaliClient:
                 dummy_image = Image.new('RGB', size, color='white')
 
                 with torch.no_grad():
-                    inputs = self.processor([dummy_image], return_tensors="pt")
+                    # Use appropriate processor method based on processor type
+                    if hasattr(self.processor, 'process_images'):
+                        inputs = self.processor.process_images([dummy_image])
+                    else:
+                        inputs = self.processor([dummy_image], return_tensors="pt")
+
                     device = next(self.model.parameters()).device
                     inputs = {k: v.to(device) if hasattr(v, 'to') else v for k, v in inputs.items()}
 
