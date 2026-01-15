@@ -20,8 +20,8 @@ function ExtractFromDocumentImage(
   schema_description: string,
   field_names: string[]
 ) -> DocumentExtractionResult {
-  // Use a vision-capable model - GPT-5 supports images
-  client "openai-responses/gpt-5"
+  // Use a vision-capable model via chat completions API
+  client "openai/gpt-4o"
   prompt #"
     You are a document extraction expert. Analyze this document image and extract the requested information.
 
@@ -50,7 +50,7 @@ function ExtractDocumentFields(
   document_image: image,
   extraction_prompt: string
 ) -> string {
-  client "openai-responses/gpt-5"
+  client "openai/gpt-4o"
   prompt #"
     Analyze this document image and extract the requested information.
 
