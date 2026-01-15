@@ -1,0 +1,226 @@
+{
+  "extreme_multi_column.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 2399,
+    "category": "layout",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "mixed_content_layout.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 2093,
+    "category": "layout",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "proper_multi_column.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 2155,
+    "category": "layout",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "overlapping_text.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 1844,
+    "category": "layout",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "single_column_typography.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 2147,
+    "category": "layout",
+    "complexity": "simple",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "tiny_fonts_spacing.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 1918,
+    "category": "layout",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "semantic_table.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 2225,
+    "category": "layout",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        2550,
+        3300
+      ]
+    ]
+  },
+  "Shipping-Stem-2025-09-30.pdf": {
+    "page_count": 4,
+    "file_size_bytes": 472608,
+    "category": "shipping",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        3509,
+        2481
+      ],
+      [
+        3509,
+        2481
+      ],
+      [
+        3509,
+        2481
+      ],
+      [
+        3509,
+        2481
+      ]
+    ]
+  },
+  "shipping-stem-2025-11-13.pdf": {
+    "page_count": 3,
+    "file_size_bytes": 516263,
+    "category": "shipping",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        3509,
+        2481
+      ],
+      [
+        3509,
+        2481
+      ],
+      [
+        3509,
+        2481
+      ]
+    ]
+  },
+  "shipping_stem-accc-30092025-1.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 135964,
+    "category": "shipping",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        3508,
+        2480
+      ]
+    ]
+  },
+  "CBH Shipping Stem 26092025.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 204467,
+    "category": "shipping",
+    "complexity": "complex",
+    "image_sizes": [
+      [
+        3508,
+        2480
+      ]
+    ]
+  },
+  "Loading-Statement-for-Web-Portal-20250923.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 114675,
+    "category": "financial",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        3300,
+        2550
+      ]
+    ]
+  },
+  "Bunge_loadingstatement_2025-09-25.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 69334,
+    "category": "financial",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        3300,
+        2550
+      ]
+    ]
+  },
+  "2857439.pdf": {
+    "page_count": 1,
+    "file_size_bytes": 59891,
+    "category": "financial",
+    "complexity": "medium",
+    "image_sizes": [
+      [
+        3509,
+        2480
+      ]
+    ]
+  },
+  "document (1).pdf": {
+    "page_count": 7,
+    "file_size_bytes": 62504,
+    "category": "financial",
+    "complexity": "simple",
+    "image_sizes": [
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ],
+      [
+        2480,
+        3509
+      ]
+    ]
+  }
+}
