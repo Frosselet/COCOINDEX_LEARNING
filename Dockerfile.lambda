@@ -81,7 +81,7 @@ COPY --from=deps /lambda-deps ${LAMBDA_TASK_ROOT}
 COPY --from=models /models ${LAMBDA_TASK_ROOT}/models
 
 # Copy application code
-COPY colpali_engine ${LAMBDA_TASK_ROOT}/colpali_engine
+COPY tatforge ${LAMBDA_TASK_ROOT}/tatforge
 COPY baml_src ${LAMBDA_TASK_ROOT}/baml_src
 COPY baml_client ${LAMBDA_TASK_ROOT}/baml_client
 COPY lambda_handler.py ${LAMBDA_TASK_ROOT}

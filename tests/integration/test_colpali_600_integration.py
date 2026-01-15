@@ -21,27 +21,27 @@ from datetime import datetime
 from PIL import Image
 import io
 
-from colpali_engine.extraction.baml_interface import (
+from tatforge.extraction.baml_interface import (
     BAMLExecutionInterface, ExtractionRequest, ExtractionContext
 )
-from colpali_engine.extraction.validation import (
+from tatforge.extraction.validation import (
     ExtractionResultValidator, create_extraction_validator
 )
-from colpali_engine.extraction.error_handling import (
+from tatforge.extraction.error_handling import (
     ErrorHandler, create_error_handler, RetryConfig, CircuitBreakerConfig,
     ErrorCategory, ErrorSeverity
 )
-from colpali_engine.extraction.quality_metrics import (
+from tatforge.extraction.quality_metrics import (
     ExtractionQualityManager, create_quality_manager, QualityDimension,
     QualityThreshold
 )
-from colpali_engine.extraction.models import (
+from tatforge.extraction.models import (
     ExtractionResult, CanonicalData, ProcessingMetadata, QualityMetrics,
     ProcessingStatus
 )
-from colpali_engine.core.schema_manager import SchemaManager, BAMLFunction
-from colpali_engine.core.baml_client_manager import BAMLClientManager
-from colpali_engine.core.vision_model_manager import VisionModelManager, FallbackStrategy
+from tatforge.core.schema_manager import SchemaManager, BAMLFunction
+from tatforge.core.baml_client_manager import BAMLClientManager
+from tatforge.core.vision_model_manager import VisionModelManager, FallbackStrategy
 
 
 class TestCOLPALI600Integration:

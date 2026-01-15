@@ -1,19 +1,24 @@
 """
-ColPali-BAML Vision Processing Engine
+tatForge - AI-powered document extraction using vision AI.
 
-A containerized Python package for vision-native document processing using
-ColPali embeddings, Qdrant vector storage, CocoIndex orchestration, and
-BAML type-safe extraction.
+Forge structured data from unstructured documents using ColPali vision embeddings,
+Qdrant vector storage, and BAML type-safe extraction.
 
 Architecture:
-- Vision-First: Documents → canonical image frames (no OCR)
-- Schema-Governed: JSON schemas → BAML classes for type-safe extraction
+- Vision-First: Documents -> canonical image frames (no OCR)
+- Schema-Governed: JSON schemas -> BAML classes for type-safe extraction
 - Dual Output: Canonical truth layer + shaped business transformations
 - Container-Native: Docker-first deployment for all environments
+
+Example:
+    >>> from tatforge import VisionExtractionPipeline, SchemaManager
+    >>> pipeline = VisionExtractionPipeline()
+    >>> result = await pipeline.process_document(document_blob, schema)
 """
 
 __version__ = "0.1.0"
-__author__ = "ColPali-BAML Team"
+__author__ = "TAT Team"
+__package_name__ = "tatforge"
 
 from .core.pipeline import VisionExtractionPipeline
 from .core.document_adapter import DocumentAdapter

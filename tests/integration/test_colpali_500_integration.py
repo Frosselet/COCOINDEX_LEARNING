@@ -18,11 +18,11 @@ import os
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from colpali_engine.core.schema_manager import SchemaManager, BAMLDefinition
-from colpali_engine.core.baml_function_generator import BAMLFunctionGenerator, ClientComplexity
-from colpali_engine.core.schema_validator import SchemaValidator, CompatibilityLevel, CompatibilityReport
-from colpali_engine.core.baml_client_manager import BAMLClientManager
-from colpali_engine.core.vision_model_manager import VisionModelManager, FallbackStrategy
+from tatforge.core.schema_manager import SchemaManager, BAMLDefinition
+from tatforge.core.baml_function_generator import BAMLFunctionGenerator, ClientComplexity
+from tatforge.core.schema_validator import SchemaValidator, CompatibilityLevel, CompatibilityReport
+from tatforge.core.baml_client_manager import BAMLClientManager
+from tatforge.core.vision_model_manager import VisionModelManager, FallbackStrategy
 
 
 class TestCOLPALI500Integration:

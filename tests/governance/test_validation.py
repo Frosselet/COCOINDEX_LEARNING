@@ -6,14 +6,14 @@ COLPALI-802: Governance validation implementation tests.
 
 import pytest
 from datetime import datetime
-from colpali_engine.governance.validation import (
+from tatforge.governance.validation import (
     GovernanceValidator,
     ValidationRule,
     ValidationResult,
     ValidationSeverity,
     RuleCategory
 )
-from colpali_engine.extraction.models import (
+from tatforge.extraction.models import (
     CanonicalData,
     ShapedData,
     TransformationRule

@@ -79,7 +79,7 @@ async def test_image_processor():
         project_root = Path(__file__).parent
         sys.path.insert(0, str(project_root))
 
-        from colpali_engine.adapters.image_processor import (
+        from tatforge.adapters.image_processor import (
             ImageProcessor, ProcessingConfig, create_image_processor
         )
     except ImportError as e:
@@ -189,7 +189,7 @@ async def test_image_processor():
         try:
             # Use the minimal PDF adapter to generate test images
             from test_pdf_minimal import PDFAdapter
-            from colpali_engine.adapters.image_processor import ConversionConfig as PDFConfig
+            from tatforge.adapters.image_processor import ConversionConfig as PDFConfig
 
             pdf_files = list(pdfs_dir.glob("*.pdf"))[:3]  # Test with first 3 PDFs
             processor = create_image_processor()

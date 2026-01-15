@@ -474,7 +474,7 @@ async def test_end_to_end_extraction(pdf_file, expected_schema, test_fixtures):
 
 **Clean Architecture Implementation**
 ```
-colpali_engine/
+tatforge/
 ├── core/                    # Business logic and orchestration
 │   ├── domain/             # Domain entities and value objects
 │   ├── use_cases/          # Application business rules
@@ -577,7 +577,7 @@ processor.save_pretrained('/models/processor')
 FROM public.ecr.aws/lambda/python:3.13 as lambda-final
 COPY --from=lambda-deps /lambda-deps ${LAMBDA_TASK_ROOT}
 COPY --from=lambda-models /models ${LAMBDA_TASK_ROOT}/models
-COPY colpali_engine ${LAMBDA_TASK_ROOT}/colpali_engine
+COPY tatforge ${LAMBDA_TASK_ROOT}/tatforge
 COPY lambda_handler.py ${LAMBDA_TASK_ROOT}
 
 CMD ["lambda_handler.main"]

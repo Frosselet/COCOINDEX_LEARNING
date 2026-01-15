@@ -71,8 +71,8 @@ docker run -p 8888:8888 -v $(pwd):/app colpali-jupyter
 ```python
 import asyncio
 from PIL import Image
-from colpali_engine.vision.colpali_client import ColPaliClient
-from colpali_engine.adapters.pdf_adapter import create_pdf_adapter
+from tatforge.vision.colpali_client import ColPaliClient
+from tatforge.adapters.pdf_adapter import create_pdf_adapter
 
 async def process_document():
     # Initialize ColPali vision client
@@ -102,8 +102,8 @@ asyncio.run(process_document())
 ### Multi-Format Processing Pipeline
 
 ```python
-from colpali_engine.core.document_adapter import DocumentAdapter, ConversionConfig
-from colpali_engine.adapters import create_pdf_adapter, create_image_adapter
+from tatforge.core.document_adapter import DocumentAdapter, ConversionConfig
+from tatforge.adapters import create_pdf_adapter, create_image_adapter
 
 async def process_any_document(file_path: str):
     # Set up multi-format processor
@@ -126,7 +126,7 @@ async def process_any_document(file_path: str):
 ### AWS Lambda Deployment
 
 ```python
-from colpali_engine.vision.colpali_client import ColPaliClient
+from tatforge.vision.colpali_client import ColPaliClient
 
 # Optimized for serverless deployment
 client = ColPaliClient(
@@ -288,7 +288,7 @@ This foundational story establishes the complete containerized infrastructure fo
 
 **Clean Architecture Principles**:
 ```
-colpali_engine/
+tatforge/
 ├── core/           # Document adapters & pipeline orchestration
 ├── vision/         # ColPali model client & embedding generation
 ├── storage/        # Qdrant vector database integration
@@ -388,7 +388,7 @@ This story delivers a comprehensive document-to-image conversion pipeline with e
 
 ##### ✅ PDF Processing Adapter (COLPALI-201)
 
-**Implementation**: `colpali_engine/adapters/pdf_adapter.py`
+**Implementation**: `tatforge/adapters/pdf_adapter.py`
 - **High-Fidelity Conversion**: PDF to image using pdf2image with poppler backend
 - **Memory Optimization**: Batch processing with configurable memory limits (300MB default)
 - **Metadata Extraction**: Page count, dimensions, title, author, creation date
@@ -397,8 +397,8 @@ This story delivers a comprehensive document-to-image conversion pipeline with e
 - **Test Validation**: 100% success rate across 15 sample PDFs ✅
 
 ```python
-from colpali_engine.adapters.pdf_adapter import create_pdf_adapter
-from colpali_engine.core.document_adapter import ConversionConfig
+from tatforge.adapters.pdf_adapter import create_pdf_adapter
+from tatforge.core.document_adapter import ConversionConfig
 
 adapter = create_pdf_adapter(max_memory_mb=300)
 config = ConversionConfig(dpi=300, quality=95, max_pages=5)
@@ -410,7 +410,7 @@ with open('document.pdf', 'rb') as f:
 
 ##### ✅ Image Standardization Processor (COLPALI-202)
 
-**Implementation**: `colpali_engine/adapters/image_processor.py`
+**Implementation**: `tatforge/adapters/image_processor.py`
 - **Dimension Standardization**: Consistent output sizes (1024x1024, 2048x2048)
 - **Color Space Normalization**: RGB/grayscale handling with background conversion
 - **Quality Optimization**: JPEG compression with file size limits
@@ -420,7 +420,7 @@ with open('document.pdf', 'rb') as f:
 - **Test Validation**: 86.1% success rate across all configurations ✅
 
 ```python
-from colpali_engine.adapters.image_processor import create_image_processor, ProcessingConfig
+from tatforge.adapters.image_processor import create_image_processor, ProcessingConfig
 
 processor = create_image_processor()
 config = ProcessingConfig(
@@ -438,7 +438,7 @@ processed_image, metadata = await processor.process_image(image, config)
 
 **Implementation**: Plugin architecture with comprehensive format support
 
-**Core Factory**: `colpali_engine/core/document_adapter.py`
+**Core Factory**: `tatforge/core/document_adapter.py`
 - **Plugin Registration**: Dynamic adapter registration system
 - **MIME Detection**: python-magic integration with signature fallback
 - **Format Routing**: Automatic adapter selection based on content type
@@ -452,8 +452,8 @@ processed_image, metadata = await processor.process_image(image, config)
 - **Extensible**: Plugin architecture for Excel, PowerPoint, Word adapters
 
 ```python
-from colpali_engine.core.document_adapter import DocumentAdapter
-from colpali_engine.adapters import create_pdf_adapter, create_image_adapter, create_html_adapter
+from tatforge.core.document_adapter import DocumentAdapter
+from tatforge.adapters import create_pdf_adapter, create_image_adapter, create_html_adapter
 
 # Set up multi-format processing
 adapter = DocumentAdapter()
@@ -506,7 +506,7 @@ This foundational story establishes the complete ColPali vision model integratio
 
 ##### ✅ ColPali Model Client with Memory Optimization (COLPALI-301)
 
-**Implementation**: `colpali_engine/vision/colpali_client.py`
+**Implementation**: `tatforge/vision/colpali_client.py`
 - **ColQwen2-v0.1 Integration**: 3B parameter model loading with device detection
 - **Memory Management**: Real-time monitoring with psutil, configurable limits
 - **Quantization Support**: INT8 quantization for memory-constrained environments
@@ -604,7 +604,7 @@ tests/vision/
 
 ```python
 # Complete workflow example
-from colpali_engine.storage.qdrant_client import QdrantManager
+from tatforge.storage.qdrant_client import QdrantManager
 
 # Initialize and configure
 qdrant = QdrantManager(collection_name="document_embeddings")
@@ -726,11 +726,11 @@ tests/storage/
 
 ```python
 # Complete COLPALI-500 workflow example
-from colpali_engine.core.schema_manager import SchemaManager
-from colpali_engine.core.baml_function_generator import BAMLFunctionGenerator
-from colpali_engine.core.schema_validator import SchemaValidator
-from colpali_engine.core.baml_client_manager import BAMLClientManager
-from colpali_engine.core.vision_model_manager import VisionModelManager, FallbackStrategy
+from tatforge.core.schema_manager import SchemaManager
+from tatforge.core.baml_function_generator import BAMLFunctionGenerator
+from tatforge.core.schema_validator import SchemaValidator
+from tatforge.core.baml_client_manager import BAMLClientManager
+from tatforge.core.vision_model_manager import VisionModelManager, FallbackStrategy
 
 # 1. JSON Schema Validation (COLPALI-503)
 validator = SchemaValidator()
@@ -920,10 +920,10 @@ baml_src/
 
 ```python
 # Complete COLPALI-600 workflow example
-from colpali_engine.extraction.baml_interface import BAMLExecutionInterface, ExtractionRequest
-from colpali_engine.extraction.validation import create_extraction_validator
-from colpali_engine.extraction.error_handling import create_error_handler
-from colpali_engine.extraction.quality_metrics import create_quality_manager
+from tatforge.extraction.baml_interface import BAMLExecutionInterface, ExtractionRequest
+from tatforge.extraction.validation import create_extraction_validator
+from tatforge.extraction.error_handling import create_error_handler
+from tatforge.extraction.quality_metrics import create_quality_manager
 
 # Initialize complete extraction pipeline
 execution_interface = BAMLExecutionInterface(
@@ -989,7 +989,7 @@ print(f"Production Ready: {result['quality'].meets_production_threshold}")
 
 ```python
 # Advanced error handling configuration
-from colpali_engine.extraction.error_handling import RetryConfig, CircuitBreakerConfig, ErrorCategory
+from tatforge.extraction.error_handling import RetryConfig, CircuitBreakerConfig, ErrorCategory
 
 # Configure intelligent retry behavior
 retry_config = RetryConfig(
@@ -1032,7 +1032,7 @@ except Exception as e:
 
 ```python
 # Comprehensive quality assessment
-from colpali_engine.extraction.quality_metrics import QualityDimension, QualityThreshold
+from tatforge.extraction.quality_metrics import QualityDimension, QualityThreshold
 
 # Quality assessment with trend analysis
 quality_report = await quality_manager.assess_extraction_quality(
@@ -1069,7 +1069,7 @@ for rec in recommendations["recommendations"]:
 
 ```python
 # Advanced validation configuration
-from colpali_engine.extraction.validation import ValidationSeverity, ValidationType
+from tatforge.extraction.validation import ValidationSeverity, ValidationType
 
 # Create validator with custom rules
 validator = ExtractionResultValidator(baml_definition=schema_def)
@@ -1177,7 +1177,7 @@ tests/integration/
 
 ```python
 # Production-ready pipeline configuration
-from colpali_engine.extraction import create_extraction_pipeline
+from tatforge.extraction import create_extraction_pipeline
 
 # Configure production pipeline
 pipeline = await create_extraction_pipeline(
@@ -1288,12 +1288,12 @@ async def production_extraction(document_images, schema_definition):
 
 ```python
 # Complete COLPALI-700 workflow example
-from colpali_engine.outputs import (
+from tatforge.outputs import (
     CanonicalFormatter,
     ShapedFormatter,
     DataExporter
 )
-from colpali_engine.extraction.models import (
+from tatforge.extraction.models import (
     CanonicalData,
     TransformationRule
 )
@@ -1407,7 +1407,7 @@ output_paths = await data_exporter.export_batch(
 print(f"Exported {len(output_paths)} files")
 
 # 7. Streaming export for large datasets
-from colpali_engine.outputs import StreamingExporter
+from tatforge.outputs import StreamingExporter
 
 streaming_exporter = StreamingExporter(chunk_size=10000)
 
@@ -1559,12 +1559,12 @@ await streaming_exporter.stream_to_parquet(
 
 ```python
 # Complete COLPALI-800 governance and lineage workflow
-from colpali_engine.governance import (
+from tatforge.governance import (
     LineageTracker,
     LineageQuery,
     GovernanceValidator
 )
-from colpali_engine.extraction.models import TransformationRule
+from tatforge.extraction.models import TransformationRule
 
 # Initialize governance system
 lineage_tracker = LineageTracker()
@@ -1864,7 +1864,7 @@ The governance framework ensures data integrity through multiple layers:
 
 ```python
 # Complete COLPALI-900 Lambda deployment workflow
-from colpali_engine.lambda_utils import (
+from tatforge.lambda_utils import (
     LambdaModelOptimizer,
     OptimizationConfig,
     LambdaResourceManager,
@@ -1976,11 +1976,11 @@ COPY requirements/lambda.txt .
 RUN pip install --no-cache-dir -r lambda.txt
 
 # Copy optimized model and application code
-COPY colpali_engine/ ./colpali_engine/
+COPY tatforge/ ./tatforge/
 COPY lambda_handler.py ./
 
 # Pre-warm model during container build (optional)
-RUN python -c "from colpali_engine.lambda_utils import LambdaModelOptimizer; print('Lambda utils ready')"
+RUN python -c "from tatforge.lambda_utils import LambdaModelOptimizer; print('Lambda utils ready')"
 
 CMD ["lambda_handler.handler"]
 ```

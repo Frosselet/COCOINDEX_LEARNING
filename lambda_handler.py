@@ -24,14 +24,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import Lambda utilities
-from colpali_engine.lambda_utils import (
+from tatforge.lambda_utils import (
     LambdaModelOptimizer,
     LambdaMonitor,
     LambdaResourceManager,
     StructuredLogger
 )
-from colpali_engine.lambda_utils.model_optimizer import OptimizationConfig
-from colpali_engine.lambda_utils.resource_manager import MemoryThresholds
+from tatforge.lambda_utils.model_optimizer import OptimizationConfig
+from tatforge.lambda_utils.resource_manager import MemoryThresholds
 
 # Global instances for Lambda warm starts
 _pipeline = None
@@ -93,13 +93,13 @@ async def _initialize_pipeline() -> Any:
 
     try:
         # Import pipeline components
-        from colpali_engine import VisionExtractionPipeline
-        from colpali_engine.core.pipeline import PipelineConfig
-        from colpali_engine.vision.colpali_client import ColPaliClient
-        from colpali_engine.storage.qdrant_client import QdrantManager
-        from colpali_engine.extraction.baml_interface import BAMLExecutionInterface
-        from colpali_engine.outputs.canonical import CanonicalFormatter
-        from colpali_engine.outputs.shaped import ShapedFormatter
+        from tatforge import VisionExtractionPipeline
+        from tatforge.core.pipeline import PipelineConfig
+        from tatforge.vision.colpali_client import ColPaliClient
+        from tatforge.storage.qdrant_client import QdrantManager
+        from tatforge.extraction.baml_interface import BAMLExecutionInterface
+        from tatforge.outputs.canonical import CanonicalFormatter
+        from tatforge.outputs.shaped import ShapedFormatter
 
         # Initialize ColPali client with Lambda optimizations
         colpali_client = ColPaliClient(

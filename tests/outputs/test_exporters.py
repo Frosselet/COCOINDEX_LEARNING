@@ -12,8 +12,8 @@ from datetime import datetime
 from pathlib import Path
 import tempfile
 import shutil
-from colpali_engine.outputs.exporters import DataExporter, StreamingExporter
-from colpali_engine.extraction.models import CanonicalData, ShapedData, TransformationRule
+from tatforge.outputs.exporters import DataExporter, StreamingExporter
+from tatforge.extraction.models import CanonicalData, ShapedData, TransformationRule
 
 
 class TestDataExporter:

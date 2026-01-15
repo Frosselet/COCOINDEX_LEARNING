@@ -134,7 +134,7 @@
 
 **File Structure**:
 ```
-colpali_engine/
+tatforge/
 ├── __init__.py                         # Public API exports
 ├── core/
 │   ├── __init__.py
@@ -1703,7 +1703,7 @@ pyarrow>=14.0.0
 **Sprint**: 13
 **Dependencies**: COLPALI-1100 (Documentation complete)
 
-**Description**: Configure the package for PyPI distribution using `uv` as the primary package manager. `uv` is 10-100x faster than pip, written in Rust by Astral (creators of Ruff). Rename package from `colpali_engine` to `tatforge`.
+**Description**: Configure the package for PyPI distribution using `uv` as the primary package manager. `uv` is 10-100x faster than pip, written in Rust by Astral (creators of Ruff). Rename package from `tatforge` to `tatforge`.
 
 **Why uv?**
 - **Speed**: 10-100x faster than pip for installs and resolves

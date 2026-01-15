@@ -1,0 +1,9 @@
+{
+  "filename": "mixed_content_layout.pdf",
+  "expected_pages": 1,
+  "expected_format": "RGB",
+  "min_width": 100,
+  "min_height": 100,
+  "expected_metadata": {},
+  "quality_threshold": 0.7
+}

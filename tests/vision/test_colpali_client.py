@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 import torch
 from PIL import Image
 
-from colpali_engine.vision.colpali_client import ColPaliClient
+from tatforge.vision.colpali_client import ColPaliClient
 
 # Test configuration
 TEST_IMAGES_COUNT = 3
@@ -350,9 +350,9 @@ class TestColPaliClient:
 
 
 # Mock the ColPali imports for testing without actual model
-@patch('colpali_engine.vision.colpali_client.ColPali', None)
-@patch('colpali_engine.vision.colpali_client.ColPaliProcessor', None)
-@patch('colpali_engine.vision.colpali_client.get_torch_device', None)
+@patch('tatforge.vision.colpali_client.ColPali', None)
+@patch('tatforge.vision.colpali_client.ColPaliProcessor', None)
+@patch('tatforge.vision.colpali_client.get_torch_device', None)
 def main():
     """Run the test suite with mocked dependencies."""
     tester = TestColPaliClient()

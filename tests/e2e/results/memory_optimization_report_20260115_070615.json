@@ -1,0 +1,155 @@
+{
+  "timestamp": "2026-01-15T07:06:08.868618",
+  "lambda_limits": {
+    "max_memory_mb": 10240,
+    "target_memory_mb": 8192,
+    "warning_threshold_mb": 7000,
+    "critical_threshold_mb": 9000,
+    "per_page_limit_mb": 150,
+    "baseline_overhead_mb": 500
+  },
+  "document_analysis": [
+    {
+      "filename": "extreme_multi_column.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_kb": 2.3427734375,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "mixed_content_layout.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_kb": 2.0439453125,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "proper_multi_column.pdf",
+      "category": "layout",
+      "complexity": "medium",
+      "file_size_kb": 2.1044921875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "overlapping_text.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_kb": 1.80078125,
+      "page_count": 1,
+      "memory_delta_mb": -198.375,
+      "memory_per_page_mb": -198.375
+    },
+    {
+      "filename": "single_column_typography.pdf",
+      "category": "layout",
+      "complexity": "simple",
+      "file_size_kb": 2.0966796875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "tiny_fonts_spacing.pdf",
+      "category": "layout",
+      "complexity": "complex",
+      "file_size_kb": 1.873046875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "semantic_table.pdf",
+      "category": "layout",
+      "complexity": "medium",
+      "file_size_kb": 2.1728515625,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "Shipping-Stem-2025-09-30.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_kb": 461.53125,
+      "page_count": 4,
+      "memory_delta_mb": 46.59375,
+      "memory_per_page_mb": 11.6484375
+    },
+    {
+      "filename": "shipping-stem-2025-11-13.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_kb": 504.1630859375,
+      "page_count": 3,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "shipping_stem-accc-30092025-1.pdf",
+      "category": "shipping",
+      "complexity": "medium",
+      "file_size_kb": 132.77734375,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "CBH Shipping Stem 26092025.pdf",
+      "category": "shipping",
+      "complexity": "complex",
+      "file_size_kb": 199.6748046875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "Loading-Statement-for-Web-Portal-20250923.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_kb": 111.9873046875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "Bunge_loadingstatement_2025-09-25.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_kb": 67.708984375,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "2857439.pdf",
+      "category": "financial",
+      "complexity": "medium",
+      "file_size_kb": 58.4873046875,
+      "page_count": 1,
+      "memory_delta_mb": 0.0,
+      "memory_per_page_mb": 0.0
+    },
+    {
+      "filename": "document (1).pdf",
+      "category": "financial",
+      "complexity": "simple",
+      "file_size_kb": 61.0390625,
+      "page_count": 7,
+      "memory_delta_mb": 179.671875,
+      "memory_per_page_mb": 25.667410714285715
+    }
+  ],
+  "recommendations": [],
+  "summary": {
+    "total_documents": 15,
+    "avg_memory_per_doc_mb": 1.859375,
+    "max_memory_per_doc_mb": 179.671875,
+    "fits_lambda_limit": true
+  }
+}
