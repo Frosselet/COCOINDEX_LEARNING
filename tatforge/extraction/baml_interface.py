@@ -188,17 +188,12 @@ class BAMLExecutionInterface:
 
             # Step 3: Execute BAML function with vision fallback
             vision_start = time.time()
-            vision_result = await self.vision_manager.process_with_vision_fallback(
+            # Pass PIL images directly - VisionModelManager will convert them
+            vision_result = self.vision_manager.process_with_vision_fallback(
                 function=request.function,
-                images=[self._image_to_path(img) for img in processed_images],
+                images=processed_images,  # Pass PIL images directly
                 fallback_strategy=request.fallback_strategy,
-                max_retries=request.max_retries,
-                timeout_seconds=request.timeout_seconds,
-                context={
-                    "document_type": request.context.document_type,
-                    "relevant_patches": relevant_patches,
-                    "processing_config": request.context.processing_config
-                }
+                max_retries=request.max_retries
             )
             vision_time = time.time() - vision_start
             self.performance_metrics["vision_processing_time"].append(vision_time)

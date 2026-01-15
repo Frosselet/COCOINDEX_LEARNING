@@ -584,9 +584,12 @@ class VisionModelManager:
         )
 
     def _execute_vision_function(self, function: BAMLFunction, images: List[Any], client_name: str) -> Any:
-        """Execute vision function with specified client."""
-        # This would integrate with actual BAML execution
-        # For now, simulate execution
+        """Execute vision function with specified client using BAML."""
+        import json
+        import tempfile
+        import baml_py
+        from PIL import Image
+
         logger.info(f"Executing {function.name} with {client_name} on {len(images)} images")
 
         # Validate inputs first
@@ -594,8 +597,115 @@ class VisionModelManager:
         if not is_valid:
             raise ValueError(f"Invalid image inputs: {'; '.join(issues)}")
 
-        # Simulate successful execution
-        return {"status": "success", "client_used": client_name, "images_processed": len(images)}
+        try:
+            # Import the generated BAML client
+            from baml_client import b
+
+            # Build extraction prompt from function definition
+            extraction_prompt = self._build_extraction_prompt(function)
+
+            # Process each image and collect results
+            all_results = []
+            for i, img in enumerate(images):
+                logger.debug(f"Processing image {i+1}/{len(images)}")
+
+                # Convert image to BAML image format
+                baml_image = self._convert_to_baml_image(img)
+
+                # Call the BAML extraction function
+                try:
+                    result = b.ExtractDocumentFields(
+                        document_image=baml_image,
+                        extraction_prompt=extraction_prompt
+                    )
+                    # Parse JSON result if it's a string
+                    if isinstance(result, str):
+                        try:
+                            parsed_result = json.loads(result)
+                        except json.JSONDecodeError:
+                            parsed_result = {"raw_text": result}
+                    else:
+                        parsed_result = result
+
+                    all_results.append(parsed_result)
+                    logger.debug(f"Extraction result for image {i+1}: {type(parsed_result)}")
+
+                except Exception as e:
+                    logger.warning(f"Extraction failed for image {i+1}: {e}")
+                    all_results.append({"error": str(e)})
+
+            # Combine results
+            if len(all_results) == 1:
+                return all_results[0]
+            else:
+                return {"pages": all_results, "total_pages": len(all_results)}
+
+        except ImportError as e:
+            logger.error(f"BAML client not available: {e}")
+            raise RuntimeError(f"BAML client not generated. Run 'baml generate' first: {e}")
+        except Exception as e:
+            logger.error(f"Vision function execution failed: {e}")
+            raise
+
+    def _build_extraction_prompt(self, function: BAMLFunction) -> str:
+        """Build extraction prompt from BAML function definition."""
+        prompt_parts = []
+
+        # Add function description if available
+        if function.description:
+            prompt_parts.append(f"Task: {function.description}")
+
+        # Add return type information
+        if function.return_type:
+            prompt_parts.append(f"\nExpected output structure: {function.return_type}")
+
+        # Add prompt template if available
+        if function.prompt_template:
+            prompt_parts.append(f"\nInstructions:\n{function.prompt_template}")
+        else:
+            # Default extraction instructions
+            prompt_parts.append("""
+Extract all relevant information from this document image.
+Return the data as a JSON object with appropriate field names and values.
+If information is unclear or not present, indicate with null or "NOT_FOUND".
+""")
+
+        return "\n".join(prompt_parts)
+
+    def _convert_to_baml_image(self, img: Any) -> "baml_py.Image":
+        """Convert various image formats to BAML image."""
+        import baml_py
+        import tempfile
+        import base64
+        import io
+        from PIL import Image
+
+        # If it's already a BAML image, return as-is
+        if isinstance(img, baml_py.Image):
+            return img
+
+        # If it's a file path string
+        if isinstance(img, str):
+            if img.startswith(('http://', 'https://')):
+                return baml_py.Image.from_url(img)
+            else:
+                return baml_py.Image.from_file(img)
+
+        # If it's a PIL Image
+        if isinstance(img, Image.Image):
+            # Convert to base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            buffer.seek(0)
+            img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            return baml_py.Image.from_base64("image/png", img_base64)
+
+        # If it's bytes
+        if isinstance(img, bytes):
+            img_base64 = base64.b64encode(img).decode('utf-8')
+            return baml_py.Image.from_base64("image/png", img_base64)
+
+        raise ValueError(f"Unsupported image type: {type(img)}")
 
     def _estimate_processing_cost(self, client_name: str, images: List[Any]) -> float:
         """Estimate processing cost for client and images."""

@@ -1,9 +1,13 @@
 """
-ColPali model client for vision-based document processing.
+ColPali/ColQwen2 model client for vision-based document processing.
 
-This module provides the interface to the ColPali vision model for generating
+This module provides the interface to ColPali and ColQwen2 vision models for generating
 patch-level embeddings from document images with memory optimization for
 AWS Lambda deployment.
+
+Supported model families:
+- ColQwen2: vidore/colqwen2-v0.1, vidore/colqwen2-v1.0, etc.
+- ColPali: vidore/colpali-v1.2, vidore/colpali, etc.
 """
 
 import asyncio
@@ -17,27 +21,44 @@ import torch
 from PIL import Image
 import warnings
 
-# ColPali imports
+# ColPali/ColQwen2 imports - support both model families
+try:
+    from colpali_engine.models import ColQwen2, ColQwen2Processor
+    from colpali_engine.utils.torch_utils import get_torch_device
+    COLQWEN2_AVAILABLE = True
+except ImportError:
+    ColQwen2 = None
+    ColQwen2Processor = None
+    COLQWEN2_AVAILABLE = False
+
 try:
     from colpali_engine.models import ColPali, ColPaliProcessor
-    from colpali_engine.utils.torch_utils import get_torch_device
-except ImportError as e:
-    logger = logging.getLogger(__name__)
-    logger.warning(f"ColPali engine not available: {e}")
-    # Fallback imports for development
+    COLPALI_AVAILABLE = True
+except ImportError:
     ColPali = None
     ColPaliProcessor = None
+    COLPALI_AVAILABLE = False
+
+try:
+    from colpali_engine.utils.torch_utils import get_torch_device
+except ImportError:
     get_torch_device = None
+
+if not COLQWEN2_AVAILABLE and not COLPALI_AVAILABLE:
+    logger = logging.getLogger(__name__)
+    logger.warning("ColPali engine not available. Install with: pip install colpali-engine")
 
 logger = logging.getLogger(__name__)
 
 
 class ColPaliClient:
     """
-    Client interface for ColPali vision model.
+    Client interface for ColPali/ColQwen2 vision models.
 
     Handles model loading, memory optimization, and batch processing
     for generating semantic embeddings from document images.
+    Automatically detects the appropriate model class (ColPali or ColQwen2)
+    based on the model name.
     """
 
     def __init__(
@@ -280,6 +301,50 @@ class ColPaliClient:
 
     # Private helper methods for COLPALI-301
 
+    def _get_model_classes(self) -> Tuple[Any, Any]:
+        """
+        Get the appropriate model and processor classes based on model name.
+
+        Returns:
+            Tuple of (ModelClass, ProcessorClass)
+
+        Raises:
+            ImportError: If required model classes are not available
+        """
+        model_name_lower = self.model_name.lower()
+
+        # ColQwen2 models (e.g., vidore/colqwen2-v0.1)
+        if "colqwen2" in model_name_lower or "colqwen" in model_name_lower:
+            if not COLQWEN2_AVAILABLE:
+                raise ImportError(
+                    f"Model {self.model_name} requires ColQwen2 classes. "
+                    "Install with: pip install colpali-engine"
+                )
+            logger.info(f"Using ColQwen2 model classes for {self.model_name}")
+            return ColQwen2, ColQwen2Processor
+
+        # ColPali models (e.g., vidore/colpali-v1.2)
+        if "colpali" in model_name_lower:
+            if not COLPALI_AVAILABLE:
+                raise ImportError(
+                    f"Model {self.model_name} requires ColPali classes. "
+                    "Install with: pip install colpali-engine"
+                )
+            logger.info(f"Using ColPali model classes for {self.model_name}")
+            return ColPali, ColPaliProcessor
+
+        # Default: try ColQwen2 first (newer), then ColPali
+        if COLQWEN2_AVAILABLE:
+            logger.info(f"Defaulting to ColQwen2 model classes for {self.model_name}")
+            return ColQwen2, ColQwen2Processor
+        elif COLPALI_AVAILABLE:
+            logger.info(f"Defaulting to ColPali model classes for {self.model_name}")
+            return ColPali, ColPaliProcessor
+        else:
+            raise ImportError(
+                "ColPali engine not available. Install with: pip install colpali-engine"
+            )
+
     def _determine_device(self) -> str:
         """
         Determine the best available device for inference.
@@ -338,27 +403,28 @@ class ColPaliClient:
 
     async def _load_model_components(self, device: str) -> None:
         """
-        Load ColPali model and processor components with optimization.
+        Load ColPali/ColQwen2 model and processor components with optimization.
 
         Args:
             device: Target device for inference
         """
-        logger.info("Loading ColPali model components...")
+        # Get the appropriate model classes based on model name
+        ModelClass, ProcessorClass = self._get_model_classes()
+        model_type = ModelClass.__name__
 
-        if ColPali is None or ColPaliProcessor is None:
-            raise ImportError("ColPali engine not available. Install with: pip install colpali-engine")
+        logger.info(f"Loading {model_type} model components...")
 
         # Load in executor to avoid blocking
         loop = asyncio.get_event_loop()
 
         # Load processor (lightweight, load first)
-        logger.info("Loading ColPali processor...")
+        logger.info(f"Loading {model_type} processor...")
         self.processor = await loop.run_in_executor(
-            None, ColPaliProcessor.from_pretrained, self.model_name
+            None, ProcessorClass.from_pretrained, self.model_name
         )
 
         # Load model with memory optimizations
-        logger.info("Loading ColPali model...")
+        logger.info(f"Loading {model_type} model...")
         model_kwargs = {
             "torch_dtype": torch.float16 if device == "cuda" else torch.float32,
             "device_map": "auto" if device == "cuda" else None,
@@ -370,7 +436,7 @@ class ColPaliClient:
             model_kwargs["load_in_8bit"] = True
 
         self.model = await loop.run_in_executor(
-            None, lambda: ColPali.from_pretrained(self.model_name, **model_kwargs)
+            None, lambda: ModelClass.from_pretrained(self.model_name, **model_kwargs)
         )
 
         # Move to target device if needed
@@ -400,9 +466,17 @@ class ColPaliClient:
 
             # Run dummy inference
             with torch.no_grad():
-                inputs = self.processor([dummy_image], return_tensors="pt")
-                if self.model.device.type == "cuda":
-                    inputs = {k: v.cuda() if hasattr(v, 'cuda') else v for k, v in inputs.items()}
+                # Use appropriate processor method based on processor type
+                if hasattr(self.processor, 'process_images'):
+                    # ColQwen2 processor
+                    inputs = self.processor.process_images([dummy_image])
+                else:
+                    # Standard ColPali processor
+                    inputs = self.processor([dummy_image], return_tensors="pt")
+
+                # Move to device
+                device = next(self.model.parameters()).device
+                inputs = {k: v.to(device) if hasattr(v, 'to') else v for k, v in inputs.items()}
 
                 # Forward pass
                 _ = self.model(**inputs)
@@ -457,11 +531,17 @@ class ColPaliClient:
             return []
 
         try:
-            # Preprocess images for ColPali
+            # Preprocess images for ColPali/ColQwen2
             logger.debug(f"Processing batch of {len(batch_images)} images")
 
-            # Use processor to prepare inputs
-            inputs = self.processor(batch_images, return_tensors="pt")
+            # ColQwen2Processor requires both images and text
+            # Use process_images method if available (ColQwen2), otherwise use __call__ (ColPali)
+            if hasattr(self.processor, 'process_images'):
+                # ColQwen2 processor - use process_images method for image-only processing
+                inputs = self.processor.process_images(batch_images)
+            else:
+                # Standard ColPali processor
+                inputs = self.processor(batch_images, return_tensors="pt")
 
             # Move inputs to model device
             device = next(self.model.parameters()).device
@@ -626,7 +706,12 @@ class ColPaliClient:
                 dummy_image = Image.new('RGB', size, color='white')
 
                 with torch.no_grad():
-                    inputs = self.processor([dummy_image], return_tensors="pt")
+                    # Use appropriate processor method based on processor type
+                    if hasattr(self.processor, 'process_images'):
+                        inputs = self.processor.process_images([dummy_image])
+                    else:
+                        inputs = self.processor([dummy_image], return_tensors="pt")
+
                     device = next(self.model.parameters()).device
                     inputs = {k: v.to(device) if hasattr(v, 'to') else v for k, v in inputs.items()}
 

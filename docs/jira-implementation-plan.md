@@ -242,13 +242,13 @@ pyarrow>=14.0.0
 ---
 
 ### Story 2: COLPALI-200 - Document Processing Pipeline
-**Points**: 21 (16 completed, 5 deprioritized)
+**Points**: 24 (16 completed, 8 in progress, 3 deprioritized)
 **Sprint**: 2-3
-**Priority**: High (Critical Path) - **CORE FEATURES COMPLETE** ✅
+**Priority**: High (Critical Path) - **COCOINDEX INTEGRATION REQUIRED** 🔴
 
-> **📋 Status Update**: Core document processing pipeline is **COMPLETE** and production-ready.
-> Advanced optimization features (COLPALI-204, COLPALI-205) have been **deprioritized** to focus on
-> end-to-end functionality. These will be implemented in future releases.
+> **📋 Status Update**: Core document adapters are **COMPLETE**. However, **COLPALI-204 (CocoIndex Integration)**
+> is now **HIGH PRIORITY** and must be completed. CocoIndex is the central orchestration framework that
+> properly wires BAML extraction and Qdrant storage. COLPALI-205 remains deprioritized.
 
 **Description**: Implement the document-to-image conversion pipeline that transforms various document formats into standardized image frames for vision processing. This story focuses on the critical adapter layer that ensures format-agnostic processing while maintaining visual fidelity.
 
@@ -357,37 +357,91 @@ pyarrow>=14.0.0
 
 ---
 
-#### COLPALI-204: Integrate CocoIndex orchestration framework [5 pts] ⚠️ **DEPRIORITIZED**
+#### COLPALI-204: Integrate CocoIndex orchestration framework [8 pts] 🔴 **HIGH PRIORITY**
 **Assignee**: Backend Engineer (Lead)
-**Sprint**: 3 → **MOVED TO FUTURE RELEASE**
+**Sprint**: 3
 **Dependencies**: COLPALI-203
 
-> **📋 Priority Note**: This task has been deprioritized to focus on core end-to-end functionality.
-> CocoIndex orchestration is an advanced optimization that can be implemented after the basic
-> document → vision → vector storage pipeline is working. Current priority: **LOW**
+> **📋 Priority Note**: This is a **CRITICAL** feature. CocoIndex is the central orchestration framework
+> that properly wires BAML extraction and Qdrant vector storage. Without CocoIndex, the pipeline
+> cannot function as designed. This follows the official CocoIndex patterns from:
+> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/patient_intake_extraction_baml
+> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/text_embedding_qdrant
 
-**Description**: Integrate CocoIndex framework to orchestrate the document processing pipeline, providing workflow management, dependency tracking, and coordination between different processing stages.
+**Description**: Integrate CocoIndex as the central orchestration framework that wires together:
+1. **Document loading** via `cocoindex.sources.LocalFile` with binary mode for PDFs
+2. **BAML extraction** using `@cocoindex.op.function()` decorator with native PDF support (`baml_py.Pdf.from_base64()`)
+3. **Qdrant storage** via `cocoindex.targets.Qdrant()` for vector embeddings
+4. **Query handlers** for semantic search via `@flow.query_handler()`
 
 **Acceptance Criteria**:
-- CocoIndex flow definitions for document processing workflow
-- Integration with existing BAML setup
-- Dependency management between processing stages
-- Error propagation and recovery mechanisms
-- Performance monitoring and metrics collection
+- CocoIndex flow definition using `@cocoindex.flow_def()` decorator
+- BAML extraction wrapped with `@cocoindex.op.function(cache=True)` for caching
+- Native PDF support using `baml_py.Pdf.from_base64()` (NOT image type)
+- Qdrant export using `cocoindex.targets.Qdrant(collection_name=...)`
+- Text embedding using `cocoindex.functions.SentenceTransformerEmbed()`
+- Query handler for semantic search with `@flow.query_handler()`
+- Collectors for gathering extracted data with metadata
 
-**Technical Implementation**:
-- Define CocoIndex transforms for each processing stage
-- Implement async processing where applicable
-- Set up workflow dependencies
-- Error handling and retry logic
-- Metrics collection at each stage
+**Technical Implementation** (based on official examples):
+```python
+import base64
+import cocoindex
+import baml_py
+from baml_client import b
+
+@cocoindex.op.function(cache=True, behavior_version=1)
+async def extract_document_data(content: bytes) -> ExtractedData:
+    """Extract structured data from PDF using BAML's native PDF support."""
+    pdf = baml_py.Pdf.from_base64(base64.b64encode(content).decode("utf-8"))
+    return await b.ExtractFromPDF(document=pdf)
+
+@cocoindex.transform_flow()
+def text_to_embedding(text: cocoindex.DataSlice[str]) -> cocoindex.DataSlice[list[float]]:
+    """Shared embedding logic for indexing and querying."""
+    return text.transform(
+        cocoindex.functions.SentenceTransformerEmbed(
+            model="sentence-transformers/all-MiniLM-L6-v2"
+        )
+    )
+
+@cocoindex.flow_def(name="DocumentExtractionFlow")
+def document_extraction_flow(
+    flow_builder: cocoindex.FlowBuilder,
+    data_scope: cocoindex.DataScope
+) -> None:
+    # Load documents as binary (required for PDFs)
+    data_scope["documents"] = flow_builder.add_source(
+        cocoindex.sources.LocalFile(path="pdfs", binary=True)
+    )
+
+    doc_embeddings = data_scope.add_collector()
+
+    with data_scope["documents"].row() as doc:
+        doc["extracted"] = doc["content"].transform(extract_document_data)
+        doc["embedding"] = text_to_embedding(doc["extracted"])
+
+        doc_embeddings.collect(
+            id=cocoindex.GeneratedField.UUID,
+            filename=doc["filename"],
+            extracted_data=doc["extracted"],
+            text_embedding=doc["embedding"],
+        )
+
+    doc_embeddings.export(
+        "doc_embeddings",
+        cocoindex.targets.Qdrant(collection_name="documents"),
+        primary_key_fields=["id"],
+    )
+```
 
 **Definition of Done**:
-- [ ] CocoIndex integration complete
-- [ ] Workflow definitions created
-- [ ] Error handling tested
-- [ ] Performance metrics validated
-- [ ] BAML integration verified
+- [ ] CocoIndex flow file created (`cocoindex_flow.py`)
+- [ ] BAML extraction uses native PDF type (not image)
+- [ ] Qdrant export configured via CocoIndex
+- [ ] Query handler implemented for semantic search
+- [ ] Integration tested with test PDFs
+- [ ] Notebook updated to use CocoIndex flow
 
 ---
 
