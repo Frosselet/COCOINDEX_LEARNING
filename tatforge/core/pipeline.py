@@ -291,9 +291,10 @@ class VisionExtractionPipeline:
                         "patch_index": patch_idx
                     })
 
-            # Build storage metadata
+            # Build storage metadata with all required fields
             storage_metadata = {
                 "document_id": self.processing_id,
+                "page_number": 0,  # Default to page 0 for single-page documents
                 "document_type": metadata.get("document_type", "pdf") if metadata else "pdf",
                 "processing_timestamp": datetime.now().isoformat(),
                 "patch_coordinates": [(m["page_number"], m["patch_index"]) for m in patch_metadata],
