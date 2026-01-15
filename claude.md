@@ -59,9 +59,9 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-1000 (Testing & Validation) ✅
   - COLPALI-1100 (Documentation & Operations) ✅
 - **Project Status**: Phase 1 Complete, Phase 2 Ready
-- **Current Branch**: `feature/COLPALI-1100-documentation-operations`
+- **Current Branch**: `main`
 - **Total Implementation**: 168 story points (Phase 1) + 21 points (Phase 2)
-- **Next Story**: COLPALI-1200 (tatForge Package Distribution)
+- **Next Story**: COLPALI-1200 (tatForge Package Distribution - pip installable package)
 
 ### Story Progress Tracking
 
