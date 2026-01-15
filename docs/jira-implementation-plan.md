@@ -1698,21 +1698,28 @@ pyarrow>=14.0.0
 
 #### Tasks:
 
-#### COLPALI-1201: PyPI-ready packaging setup [5 pts]
+#### COLPALI-1201: uv-managed package setup [5 pts]
 **Assignee**: Backend Engineer (Lead)
 **Sprint**: 13
 **Dependencies**: COLPALI-1100 (Documentation complete)
 
-**Description**: Configure the package for PyPI distribution with proper metadata, versioning, build system, and dependency management. Rename package from `colpali_engine` to `tatforge`.
+**Description**: Configure the package for PyPI distribution using `uv` as the primary package manager. `uv` is 10-100x faster than pip, written in Rust by Astral (creators of Ruff). Rename package from `colpali_engine` to `tatforge`.
+
+**Why uv?**
+- **Speed**: 10-100x faster than pip for installs and resolves
+- **Reliability**: Better dependency resolution with cross-platform lockfiles
+- **Modern**: Recommended replacement for pip, pip-tools, virtualenv
+- **Compatible**: Works with existing pyproject.toml and requirements.txt
 
 **Acceptance Criteria**:
 - Complete pyproject.toml with all PyPI metadata
+- uv.lock file for reproducible builds
 - Semantic versioning (0.1.0 initial release)
-- Build system configured (hatchling or setuptools)
-- MANIFEST.in for package data (BAML files, etc.)
+- Build system configured (hatchling)
 - Optional dependency groups: [lambda], [jupyter], [dev]
-- Local pip install tested successfully
-- README formatted for PyPI display
+- Local install tested with `uv pip install -e .`
+- README includes uv installation instructions
+- CI/CD configured for uv
 
 **Technical Implementation**:
 ```toml
@@ -1724,7 +1731,7 @@ description = "AI-powered document extraction - forge structured data from unstr
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "TAT Team"}]
-keywords = ["document-extraction", "vision-ai", "colpali", "baml", "structured-data"]
+keywords = ["document-extraction", "vision-ai", "colpali", "baml", "structured-data", "uv"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -1746,7 +1753,7 @@ dependencies = [
 [project.optional-dependencies]
 lambda = ["psutil>=5.9.0"]
 jupyter = ["ipywidgets>=8.0.0", "matplotlib>=3.8.0"]
-dev = ["pytest>=7.0.0", "black>=23.0.0", "mypy>=1.0.0"]
+dev = ["pytest>=7.0.0", "ruff>=0.1.0", "mypy>=1.0.0"]
 
 [project.scripts]
 tatforge = "tatforge.cli:main"
@@ -1754,14 +1761,54 @@ tatforge = "tatforge.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv]
+# uv-specific configuration
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[tool.ruff]
+# Use ruff instead of black/flake8 (also from Astral)
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+```
+
+**Installation Commands**:
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment with uv
+uv venv
+
+# Install package in development mode
+uv pip install -e ".[dev]"
+
+# Install with specific extras
+uv pip install -e ".[lambda,jupyter]"
+
+# Sync from lockfile (reproducible)
+uv sync
+
+# Generate/update lockfile
+uv lock
 ```
 
 **Definition of Done**:
-- [ ] pyproject.toml complete with all metadata
+- [ ] pyproject.toml complete with uv configuration
 - [ ] Package renamed to tatforge
-- [ ] Local pip install works: `pip install -e .`
-- [ ] Build artifacts created: `python -m build`
+- [ ] uv.lock file generated
+- [ ] Local install works: `uv pip install -e .`
+- [ ] Build artifacts created: `uv build`
 - [ ] Optional dependencies tested
+- [ ] README includes uv installation guide
 
 ---
 
@@ -2013,20 +2060,20 @@ def display_result(result: ExtractionResult):
 
 ---
 
-#### COLPALI-1205: Package integration testing [3 pts]
+#### COLPALI-1205: Package integration testing with uv [3 pts]
 **Assignee**: QA Engineer
 **Sprint**: 14
 **Dependencies**: COLPALI-1201, COLPALI-1202, COLPALI-1203
 
-**Description**: Create comprehensive integration tests that validate the package works correctly when installed via pip in a clean Python environment, across different Python versions.
+**Description**: Create comprehensive integration tests that validate the package works correctly when installed via uv in a clean Python environment, across different Python versions.
 
 **Acceptance Criteria**:
-- Tests run in clean virtual environment
+- Tests run in clean uv-managed virtual environment
 - Python 3.11, 3.12, 3.13 compatibility verified
 - Import tests for all public modules
 - Basic functionality tests
 - CLI command tests
-- CI/CD pipeline for automated testing
+- CI/CD pipeline using uv for speed
 
 **Test Matrix**:
 ```yaml
@@ -2043,22 +2090,37 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
 
-      - name: Install package
-        run: pip install -e .[dev]
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Create venv and install package
+        run: |
+          uv venv --python ${{ matrix.python-version }}
+          uv pip install -e ".[dev]"
 
       - name: Test imports
-        run: python -c "from tatforge import VisionPipeline; print('OK')"
+        run: uv run python -c "from tatforge import VisionPipeline; print('OK')"
 
       - name: Run tests
-        run: pytest tests/package/ -v
+        run: uv run pytest tests/package/ -v
 
       - name: Test CLI
-        run: tatforge info
+        run: uv run tatforge info
+
+  # Fast dependency resolution check
+  lockfile-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - name: Check lockfile is up to date
+        run: uv lock --check
 ```
 
 **Integration Test Suite**:
@@ -2100,17 +2162,26 @@ def test_cli_available():
 
 **Total Points**: 21
 **Sprint**: 13-14
+**Package Manager**: uv (10-100x faster than pip)
+
 **Deliverables**:
-- `tatforge` pip-installable package
+- `tatforge` uv-managed Python package
 - Clean public API with documentation
 - CLI interface (`tatforge process`, `tatforge serve`)
 - 5 Jupyter notebook examples
-- CI/CD pipeline for package releases
+- CI/CD pipeline using uv for fast builds
 
 **Usage After Completion**:
 ```bash
-# Install
-pip install tatforge
+# Install uv (one-time)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install tatforge with uv (recommended - fast!)
+uv pip install tatforge
+
+# Or create a project with tatforge as dependency
+uv init my-extraction-project
+uv add tatforge
 
 # CLI usage
 tatforge process document.pdf --schema schema.json
