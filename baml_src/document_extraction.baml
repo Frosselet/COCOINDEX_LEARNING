@@ -65,15 +65,16 @@ function ExtractDocumentFieldsFromPDF(
 
 // Image-based extraction function for ColPali pipeline
 // ColPali converts PDFs to 300 DPI page images, so we need image input support
+// NOTE: OpenAI requires images in user messages, not system messages
 function ExtractDocumentFieldsFromImage(
   document_image: image,
   extraction_prompt: string
 ) -> string {
   client "openai/gpt-4o"
   prompt #"
+    {{ _.role("user") }}
     Analyze this document image and extract the requested information.
 
-    Document Image:
     {{ document_image }}
 
     {{ extraction_prompt }}
@@ -83,6 +84,7 @@ function ExtractDocumentFieldsFromImage(
 }
 
 // Structured extraction from image with schema
+// NOTE: OpenAI requires images in user messages, not system messages
 function ExtractFromImage(
   document_image: image,
   schema_description: string,
@@ -90,9 +92,9 @@ function ExtractFromImage(
 ) -> DocumentExtractionResult {
   client "openai/gpt-4o"
   prompt #"
+    {{ _.role("user") }}
     You are a document extraction expert. Analyze this document image and extract the requested information.
 
-    Document Image:
     {{ document_image }}
 
     Schema Description:
