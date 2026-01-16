@@ -528,9 +528,274 @@ class VisionExtractionPipeline:
         pass
 
 
-# CocoIndex integration patterns (to be implemented)
+# =============================================================================
+# CocoIndex Integration - COLPALI-204
+# =============================================================================
+# Architecture:
+#   FLOW 1 (Indexing): PDF → pdf2image → ColPali Embeddings → Qdrant
+#   FLOW 2 (Extraction): Query → Qdrant Search → Retrieved Pages → BAML → Structured Output
+#
+# Based on:
+#   - https://github.com/cocoindex-io/cocoindex/tree/main/examples/multi_format_indexing
+#   - https://github.com/cocoindex-io/cocoindex/tree/main/examples/patient_intake_extraction_baml
+# =============================================================================
+
+import os
+import mimetypes
+from dataclasses import dataclass as cocoindex_dataclass
+from io import BytesIO
+
+try:
+    import cocoindex
+    from qdrant_client import QdrantClient
+    COCOINDEX_AVAILABLE = True
+except ImportError:
+    COCOINDEX_AVAILABLE = False
+    logger.warning("CocoIndex not installed. Run: pip install cocoindex")
+
+# Configuration from environment
+QDRANT_GRPC_URL = os.getenv("QDRANT_GRPC_URL", "http://localhost:6334")
+QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "DocumentEmbeddings")
+COLPALI_MODEL = os.getenv("COLPALI_MODEL", "vidore/colqwen2-v0.1")
+PDF_PATH = os.getenv("PDF_PATH", "pdfs")
+
+
+@cocoindex_dataclass
+class Page:
+    """Represents a single page from a document for ColPali embedding."""
+    page_number: int | None
+    image: bytes
+
+
+def _file_to_pages_impl(filename: str, content: bytes) -> list:
+    """
+    Convert document files to a list of page images.
+
+    - PDFs are converted to PNG images at 300 DPI
+    - Image files are passed through directly
+    - Other file types return empty list
+    """
+    mime_type, _ = mimetypes.guess_type(filename)
+
+    if mime_type == "application/pdf":
+        images = convert_from_bytes(content, dpi=300)
+        pages = []
+        for i, image in enumerate(images):
+            with BytesIO() as buffer:
+                image.save(buffer, format="PNG")
+                pages.append(Page(page_number=i + 1, image=buffer.getvalue()))
+        return pages
+    elif mime_type and mime_type.startswith("image/"):
+        return [Page(page_number=None, image=content)]
+    else:
+        return []
+
+
 def register_cocoindex_flows():
-    """Register ColPali-BAML flows with CocoIndex orchestration."""
-    # TODO: Implement CocoIndex flow registration
-    # This will be implemented in COLPALI-204
-    pass
+    """
+    Register ColPali-BAML flows with CocoIndex orchestration.
+
+    This creates two flows:
+    1. document_indexing_flow: Indexes documents with ColPali embeddings in Qdrant
+    2. Extraction functions: BAML extraction with caching for structured output
+
+    Returns the flow functions for external use.
+    """
+    if not COCOINDEX_AVAILABLE:
+        logger.error("Cannot register CocoIndex flows: cocoindex not installed")
+        return None
+
+    # Register Qdrant connection
+    qdrant_connection = cocoindex.add_auth_entry(
+        "qdrant_connection",
+        cocoindex.targets.QdrantConnection(grpc_url=QDRANT_GRPC_URL),
+    )
+
+    # Wrap file_to_pages with CocoIndex decorator
+    @cocoindex.op.function()
+    def file_to_pages(filename: str, content: bytes) -> list:
+        """CocoIndex wrapper for file to pages conversion."""
+        return _file_to_pages_impl(filename, content)
+
+    # FLOW 1: Document Indexing with ColPali
+    @cocoindex.flow_def(name="DocumentIndexingFlow")
+    def document_indexing_flow(
+        flow_builder: cocoindex.FlowBuilder,
+        data_scope: cocoindex.DataScope
+    ) -> None:
+        """
+        Index documents with ColPali embeddings in Qdrant.
+
+        Flow:
+        1. Load PDF/image files from local directory (binary mode)
+        2. Convert PDFs to page images at 300 DPI
+        3. Generate ColPali embeddings for each page
+        4. Store embeddings in Qdrant with metadata
+        """
+        # Load documents from local file source (binary mode for PDFs)
+        data_scope["documents"] = flow_builder.add_source(
+            cocoindex.sources.LocalFile(path=PDF_PATH, binary=True)
+        )
+
+        # Collector for page embeddings
+        output_embeddings = data_scope.add_collector()
+
+        # Process each document
+        with data_scope["documents"].row() as doc:
+            # Convert file to pages (PDF→images or pass through images)
+            doc["pages"] = flow_builder.transform(
+                file_to_pages,
+                filename=doc["filename"],
+                content=doc["content"]
+            )
+
+            # Process each page
+            with doc["pages"].row() as page:
+                # Generate ColPali embedding for the page image
+                page["embedding"] = page["image"].transform(
+                    cocoindex.functions.ColPaliEmbedImage(model=COLPALI_MODEL)
+                )
+
+                # Collect with metadata
+                output_embeddings.collect(
+                    id=cocoindex.GeneratedField.UUID,
+                    filename=doc["filename"],
+                    page=page["page_number"],
+                    embedding=page["embedding"],
+                )
+
+        # Export to Qdrant
+        output_embeddings.export(
+            "document_embeddings",
+            cocoindex.targets.Qdrant(
+                connection=qdrant_connection,
+                collection_name=QDRANT_COLLECTION,
+            ),
+            primary_key_fields=["id"],
+        )
+
+    # Query transformation for ColPali embeddings
+    @cocoindex.transform_flow()
+    def query_to_colpali_embedding(
+        text: cocoindex.DataSlice[str],
+    ) -> cocoindex.DataSlice[list]:
+        """
+        Convert text query to ColPali multi-vector embedding.
+
+        ColPali uses multi-vector embeddings (list of vectors) for
+        late interaction retrieval, providing spatial awareness.
+        """
+        return text.transform(
+            cocoindex.functions.ColPaliEmbedQuery(model=COLPALI_MODEL)
+        )
+
+    # FLOW 2: BAML Extraction (cached, async)
+    @cocoindex.op.function(cache=True, behavior_version=1)
+    async def extract_with_baml(page_image: bytes, schema_json: dict) -> dict:
+        """
+        Extract structured data from a page image using BAML.
+
+        Uses tatforge's BAMLFunctionGenerator for schema-driven extraction.
+        Caching (cache=True) prevents redundant LLM calls for the same page.
+
+        Args:
+            page_image: PNG image bytes
+            schema_json: JSON schema for extraction
+
+        Returns:
+            Extracted data as dict matching the schema
+        """
+        import base64
+        try:
+            import baml_py
+            from baml_client import b
+        except ImportError:
+            logger.error("BAML not available for extraction")
+            return {"error": "BAML not installed"}
+
+        from .schema_manager import SchemaManager
+        from .baml_function_generator import BAMLFunctionGenerator
+
+        # Generate BAML function from schema
+        schema_manager = SchemaManager()
+        baml_def = schema_manager.generate_baml_classes(schema_json)
+
+        function_generator = BAMLFunctionGenerator()
+        optimized_functions = function_generator.generate_optimized_functions(baml_def)
+
+        if not optimized_functions:
+            return {"error": "No extraction function generated"}
+
+        # Convert image to BAML format
+        image_b64 = base64.b64encode(page_image).decode("utf-8")
+        image = baml_py.Image.from_base64("image/png", image_b64)
+
+        # Execute the generated extraction function
+        function_name = optimized_functions[0].name
+        if hasattr(b, function_name):
+            result = await getattr(b, function_name)(document_images=[image])
+            return result.model_dump() if hasattr(result, 'model_dump') else result
+        else:
+            return {"error": f"BAML function {function_name} not found"}
+
+    logger.info(f"CocoIndex flows registered:")
+    logger.info(f"  - DocumentIndexingFlow (ColPali → Qdrant)")
+    logger.info(f"  - query_to_colpali_embedding (text → ColPali embedding)")
+    logger.info(f"  - extract_with_baml (page → BAML → structured data)")
+    logger.info(f"  Qdrant: {QDRANT_GRPC_URL}")
+    logger.info(f"  Collection: {QDRANT_COLLECTION}")
+    logger.info(f"  ColPali Model: {COLPALI_MODEL}")
+
+    return {
+        "document_indexing_flow": document_indexing_flow,
+        "query_to_colpali_embedding": query_to_colpali_embedding,
+        "extract_with_baml": extract_with_baml,
+        "file_to_pages": file_to_pages,
+        "qdrant_connection": qdrant_connection,
+    }
+
+
+def search_documents(query: str, limit: int = 5) -> list:
+    """
+    Search indexed documents using ColPali embeddings.
+
+    Args:
+        query: Natural language search query
+        limit: Maximum number of results to return
+
+    Returns:
+        List of search results with score, filename, and page number
+    """
+    if not COCOINDEX_AVAILABLE:
+        logger.error("CocoIndex not available for search")
+        return []
+
+    flows = register_cocoindex_flows()
+    if not flows:
+        return []
+
+    client = QdrantClient(url=QDRANT_GRPC_URL, prefer_grpc=True)
+
+    # Convert query to ColPali multi-vector embedding
+    query_embedding = flows["query_to_colpali_embedding"].eval(query)
+
+    # Search Qdrant
+    search_results = client.query_points(
+        collection_name=QDRANT_COLLECTION,
+        query=query_embedding,
+        using="embedding",
+        limit=limit,
+        with_payload=True,
+    )
+
+    results = []
+    for result in search_results.points:
+        if result.payload is None:
+            continue
+        results.append({
+            "score": result.score,
+            "filename": result.payload.get("filename"),
+            "page": result.payload.get("page"),
+        })
+
+    return results
