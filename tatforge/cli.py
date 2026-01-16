@@ -106,6 +106,22 @@ def parse_args() -> argparse.Namespace:
         help="Schema file to validate",
     )
 
+    # CocoIndex command
+    cocoindex_parser = subparsers.add_parser(
+        "cocoindex",
+        help="Run CocoIndex operations (setup, update, server)",
+    )
+    cocoindex_parser.add_argument(
+        "action",
+        choices=["setup", "update", "server", "search"],
+        help="CocoIndex action to perform",
+    )
+    cocoindex_parser.add_argument(
+        "-q", "--query",
+        type=str,
+        help="Search query (for search action)",
+    )
+
     return parser.parse_args()
 
 
@@ -246,6 +262,102 @@ def cmd_validate(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_cocoindex(args: argparse.Namespace) -> int:
+    """Execute CocoIndex operations."""
+    logger = logging.getLogger(__name__)
+
+    try:
+        from dotenv import load_dotenv
+        import cocoindex
+
+        # Load environment variables
+        load_dotenv()
+
+        # Initialize CocoIndex
+        cocoindex.init()
+
+        # Import flows (registers them at import time)
+        from tatforge.flows import (
+            document_indexing_flow,
+            query_to_colpali_embedding,
+            QDRANT_GRPC_URL,
+            QDRANT_COLLECTION,
+            PDF_PATH,
+        )
+
+        logger.info(f"CocoIndex initialized")
+        logger.info(f"  PDF Path: {PDF_PATH}")
+        logger.info(f"  Qdrant: {QDRANT_GRPC_URL}")
+        logger.info(f"  Collection: {QDRANT_COLLECTION}")
+
+        if args.action == "search":
+            if not args.query:
+                logger.error("Search requires --query argument")
+                return 1
+
+            from qdrant_client import QdrantClient
+
+            print(f"\nSearching for: '{args.query}'...")
+            query_embedding = query_to_colpali_embedding.eval(args.query)
+
+            client = QdrantClient(url=QDRANT_GRPC_URL, prefer_grpc=True)
+            search_results = client.query_points(
+                collection_name=QDRANT_COLLECTION,
+                query=query_embedding,
+                using="embedding",
+                limit=5,
+                with_payload=True,
+            )
+
+            if search_results.points:
+                print(f"\nFound {len(search_results.points)} results:")
+                for i, result in enumerate(search_results.points, 1):
+                    if result.payload:
+                        page = result.payload.get("page", "?")
+                        filename = result.payload.get("filename", "unknown")
+                        print(f"  {i}. [{result.score:.4f}] {filename} (page {page})")
+            else:
+                print("\nNo results found.")
+                print("Tip: Run 'tatforge cocoindex update' to index documents first.")
+            return 0
+
+        elif args.action == "setup":
+            # Setup all flows (create collections, etc.)
+            print("\nRunning: cocoindex setup")
+            print("-" * 40)
+            cocoindex.setup_all_flows()
+            print("\n✅ Setup complete!")
+            return 0
+
+        elif args.action == "update":
+            # Update all flows (index documents)
+            print("\nRunning: cocoindex update")
+            print("-" * 40)
+            import asyncio
+            asyncio.run(cocoindex.update_all_flows_async())
+            print("\n✅ Update complete!")
+            return 0
+
+        elif args.action == "server":
+            # Start CocoIndex server
+            print("\nStarting CocoIndex server...")
+            print("-" * 40)
+            cocoindex.start_server()
+            return 0
+
+        else:
+            logger.error(f"Unknown action: {args.action}")
+            return 1
+
+    except ImportError as e:
+        logger.error(f"Missing dependency: {e}")
+        logger.error("Run: pip install cocoindex python-dotenv")
+        return 1
+    except Exception as e:
+        logger.error(f"CocoIndex error: {e}")
+        return 1
+
+
 def main() -> int:
     """Main entry point for tatforge CLI."""
     args = parse_args()
@@ -261,6 +373,8 @@ def main() -> int:
         return cmd_info(args)
     elif args.command == "validate":
         return cmd_validate(args)
+    elif args.command == "cocoindex":
+        return cmd_cocoindex(args)
     else:
         # No command provided, show help
         print("tatForge - AI-powered document extraction")
@@ -268,9 +382,15 @@ def main() -> int:
         print("Usage: tatforge <command> [options]")
         print()
         print("Commands:")
-        print("  extract   Extract structured data from documents")
-        print("  info      Display package and model information")
-        print("  validate  Validate a schema file")
+        print("  extract    Extract structured data from documents")
+        print("  info       Display package and model information")
+        print("  validate   Validate a schema file")
+        print("  cocoindex  Run CocoIndex operations (setup, update, server, search)")
+        print()
+        print("CocoIndex commands:")
+        print("  tatforge cocoindex setup     Create Qdrant collection")
+        print("  tatforge cocoindex update    Index all PDFs with ColPali")
+        print("  tatforge cocoindex search -q 'query'  Search documents")
         print()
         print("Run 'tatforge <command> --help' for command-specific help.")
         return 0
