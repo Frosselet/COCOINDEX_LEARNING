@@ -39,6 +39,7 @@ class BamlAsyncClient:
     def with_options(self,
         tb: typing.Optional[type_builder.TypeBuilder] = None,
         client_registry: typing.Optional[baml_py.baml_py.ClientRegistry] = None,
+        client: typing.Optional[str] = None,
         collector: typing.Optional[typing.Union[baml_py.baml_py.Collector, typing.List[baml_py.baml_py.Collector]]] = None,
         env: typing.Optional[typing.Dict[str, typing.Optional[str]]] = None,
         tags: typing.Optional[typing.Dict[str, str]] = None,
@@ -49,6 +50,8 @@ class BamlAsyncClient:
             options["tb"] = tb
         if client_registry is not None:
             options["client_registry"] = client_registry
+        if client is not None:
+            options["client"] = client
         if collector is not None:
             options["collector"] = collector
         if env is not None:
@@ -79,6 +82,21 @@ class BamlAsyncClient:
     def parse_stream(self):
       return self.__llm_stream_parser
 
+    async def ExtractDocumentFieldsFromImage(self, document_image: baml_py.Image,extraction_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> str:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            __stream__ = self.stream.ExtractDocumentFieldsFromImage(document_image=document_image,extraction_prompt=extraction_prompt,
+                baml_options=baml_options)
+            return await __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExtractDocumentFieldsFromImage", args={
+                "document_image": document_image,"extraction_prompt": extraction_prompt,
+            })
+            return typing.cast(str, __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def ExtractDocumentFieldsFromPDF(self, document: baml_py.Pdf,extraction_prompt: str,
         baml_options: BamlCallOptions = {},
     ) -> str:
@@ -94,6 +112,21 @@ class BamlAsyncClient:
                 "document": document,"extraction_prompt": extraction_prompt,
             })
             return typing.cast(str, __result__.cast_to(types, types, stream_types, False, __runtime__))
+    async def ExtractFromImage(self, document_image: baml_py.Image,schema_description: str,field_names: typing.List[str],
+        baml_options: BamlCallOptions = {},
+    ) -> types.DocumentExtractionResult:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            __stream__ = self.stream.ExtractFromImage(document_image=document_image,schema_description=schema_description,field_names=field_names,
+                baml_options=baml_options)
+            return await __stream__.get_final_response()
+        else:
+            # Original non-streaming code
+            __result__ = await self.__options.merge_options(baml_options).call_function_async(function_name="ExtractFromImage", args={
+                "document_image": document_image,"schema_description": schema_description,"field_names": field_names,
+            })
+            return typing.cast(types.DocumentExtractionResult, __result__.cast_to(types, types, stream_types, False, __runtime__))
     async def ExtractFromPDF(self, document: baml_py.Pdf,schema_description: str,field_names: typing.List[str],
         baml_options: BamlCallOptions = {},
     ) -> types.DocumentExtractionResult:
@@ -133,6 +166,18 @@ class BamlStreamClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def ExtractDocumentFieldsFromImage(self, document_image: baml_py.Image,extraction_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[str, str]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExtractDocumentFieldsFromImage", args={
+            "document_image": document_image,"extraction_prompt": extraction_prompt,
+        })
+        return baml_py.BamlStream[str, str](
+          __result__,
+          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(str, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
     def ExtractDocumentFieldsFromPDF(self, document: baml_py.Pdf,extraction_prompt: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[str, str]:
@@ -143,6 +188,18 @@ class BamlStreamClient:
           __result__,
           lambda x: typing.cast(str, x.cast_to(types, types, stream_types, True, __runtime__)),
           lambda x: typing.cast(str, x.cast_to(types, types, stream_types, False, __runtime__)),
+          __ctx__,
+        )
+    def ExtractFromImage(self, document_image: baml_py.Image,schema_description: str,field_names: typing.List[str],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.DocumentExtractionResult, types.DocumentExtractionResult]:
+        __ctx__, __result__ = self.__options.merge_options(baml_options).create_async_stream(function_name="ExtractFromImage", args={
+            "document_image": document_image,"schema_description": schema_description,"field_names": field_names,
+        })
+        return baml_py.BamlStream[stream_types.DocumentExtractionResult, types.DocumentExtractionResult](
+          __result__,
+          lambda x: typing.cast(stream_types.DocumentExtractionResult, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.DocumentExtractionResult, x.cast_to(types, types, stream_types, False, __runtime__)),
           __ctx__,
         )
     def ExtractFromPDF(self, document: baml_py.Pdf,schema_description: str,field_names: typing.List[str],
@@ -177,11 +234,25 @@ class BamlHttpRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    async def ExtractDocumentFieldsFromImage(self, document_image: baml_py.Image,extraction_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractDocumentFieldsFromImage", args={
+            "document_image": document_image,"extraction_prompt": extraction_prompt,
+        }, mode="request")
+        return __result__
     async def ExtractDocumentFieldsFromPDF(self, document: baml_py.Pdf,extraction_prompt: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractDocumentFieldsFromPDF", args={
             "document": document,"extraction_prompt": extraction_prompt,
+        }, mode="request")
+        return __result__
+    async def ExtractFromImage(self, document_image: baml_py.Image,schema_description: str,field_names: typing.List[str],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractFromImage", args={
+            "document_image": document_image,"schema_description": schema_description,"field_names": field_names,
         }, mode="request")
         return __result__
     async def ExtractFromPDF(self, document: baml_py.Pdf,schema_description: str,field_names: typing.List[str],
@@ -206,11 +277,25 @@ class BamlHttpStreamRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    async def ExtractDocumentFieldsFromImage(self, document_image: baml_py.Image,extraction_prompt: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractDocumentFieldsFromImage", args={
+            "document_image": document_image,"extraction_prompt": extraction_prompt,
+        }, mode="stream")
+        return __result__
     async def ExtractDocumentFieldsFromPDF(self, document: baml_py.Pdf,extraction_prompt: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
         __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractDocumentFieldsFromPDF", args={
             "document": document,"extraction_prompt": extraction_prompt,
+        }, mode="stream")
+        return __result__
+    async def ExtractFromImage(self, document_image: baml_py.Image,schema_description: str,field_names: typing.List[str],
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        __result__ = await self.__options.merge_options(baml_options).create_http_request_async(function_name="ExtractFromImage", args={
+            "document_image": document_image,"schema_description": schema_description,"field_names": field_names,
         }, mode="stream")
         return __result__
     async def ExtractFromPDF(self, document: baml_py.Pdf,schema_description: str,field_names: typing.List[str],
