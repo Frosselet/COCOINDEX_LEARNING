@@ -494,13 +494,13 @@ async def extract_structured_data(page_image: bytes, baml_function_name: str) ->
 ```
 
 **Definition of Done**:
-- [ ] CocoIndex flow integrated into tatforge/core/pipeline.py
-- [ ] PDF→Images via pdf2image at 300 DPI
-- [ ] ColPali embeddings via cocoindex.functions.ColPaliEmbedImage
-- [ ] Qdrant export via cocoindex.targets.Qdrant
-- [ ] Query handler with ColPaliEmbedQuery for semantic search
-- [ ] Integration with tatforge's BAMLFunctionGenerator for post-retrieval extraction
-- [ ] Integration tested with test PDFs
+- [x] CocoIndex flow integrated into tatforge/core/pipeline.py ✅
+- [x] PDF→Images via pdf2image at 300 DPI ✅
+- [x] ColPali embeddings via cocoindex.functions.ColPaliEmbedImage ✅
+- [x] Qdrant export via cocoindex.targets.Qdrant ✅
+- [x] Query handler with ColPaliEmbedQuery for semantic search ✅
+- [x] Integration with tatforge's BAMLFunctionGenerator for post-retrieval extraction ✅
+- [x] Integration tested with test PDFs ✅
 
 ---
 
