@@ -242,13 +242,13 @@ pyarrow>=14.0.0
 ---
 
 ### Story 2: COLPALI-200 - Document Processing Pipeline
-**Points**: 24 (16 completed, 8 in progress, 3 deprioritized)
+**Points**: 24 (21 completed, 3 deprioritized)
 **Sprint**: 2-3
-**Priority**: High (Critical Path) - **COCOINDEX INTEGRATION REQUIRED** 🔴
+**Priority**: High (Critical Path) - **COMPLETE** ✅
 
-> **📋 Status Update**: Core document adapters are **COMPLETE**. However, **COLPALI-204 (CocoIndex Integration)**
-> is now **HIGH PRIORITY** and must be completed. CocoIndex is the central orchestration framework that
-> properly wires BAML extraction and Qdrant storage. COLPALI-205 remains deprioritized.
+> **📋 Status Update**: All core tasks are **COMPLETE** including **COLPALI-204 (CocoIndex Integration)**.
+> CocoIndex now orchestrates the tatforge pipeline with ColPali embeddings and Qdrant storage.
+> COLPALI-205 (caching) remains deprioritized for future release.
 
 **Description**: Implement the document-to-image conversion pipeline that transforms various document formats into standardized image frames for vision processing. This story focuses on the critical adapter layer that ensures format-agnostic processing while maintaining visual fidelity.
 
