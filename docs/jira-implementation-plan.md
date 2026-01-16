@@ -363,85 +363,144 @@ pyarrow>=14.0.0
 **Dependencies**: COLPALI-203
 
 > **📋 Priority Note**: This is a **CRITICAL** feature. CocoIndex is the central orchestration framework
-> that properly wires BAML extraction and Qdrant vector storage. Without CocoIndex, the pipeline
-> cannot function as designed. This follows the official CocoIndex patterns from:
-> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/patient_intake_extraction_baml
-> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/text_embedding_qdrant
+> that properly wires ColPali vision embeddings and Qdrant vector storage. This follows the official
+> CocoIndex ColPali pattern from:
+> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/multi_format_indexing (ColPali + Qdrant)
+> - https://github.com/cocoindex-io/cocoindex/tree/main/examples/patient_intake_extraction_baml (BAML schema)
 
 **Description**: Integrate CocoIndex as the central orchestration framework that wires together:
 1. **Document loading** via `cocoindex.sources.LocalFile` with binary mode for PDFs
-2. **BAML extraction** using `@cocoindex.op.function()` decorator with native PDF support (`baml_py.Pdf.from_base64()`)
-3. **Qdrant storage** via `cocoindex.targets.Qdrant()` for vector embeddings
-4. **Query handlers** for semantic search via `@flow.query_handler()`
+2. **PDF to images** via `@cocoindex.op.function()` using pdf2image at 300 DPI
+3. **ColPali embeddings** via `cocoindex.functions.ColPaliEmbedImage()` for spatial awareness
+4. **Qdrant storage** via `cocoindex.targets.Qdrant()` for multi-vector embeddings
+5. **Query handler** via `@flow.query_handler()` with `ColPaliEmbedQuery()` for semantic search
+6. **BAML extraction** via tatforge's BAMLFunctionGenerator for structured output AFTER retrieval
+
+**Architecture** (combining both CocoIndex patterns):
+
+```
+FLOW 1 - INDEXING (multi_format_indexing pattern):
+  PDF → pdf2image (300dpi) → ColPali Embeddings → Qdrant
+
+FLOW 2 - EXTRACTION (patient_intake_extraction_baml pattern):
+  Query → ColPali Query Embedding → Qdrant Search → Retrieved Page Images
+  → BAML Extraction (tatforge BAMLFunctionGenerator) → Structured Output
+```
+
+**Key integration points**:
+- Indexing: Use `cocoindex.functions.ColPaliEmbedImage()` for spatial-aware embeddings
+- Search: Use `cocoindex.functions.ColPaliEmbedQuery()` for text→embedding conversion
+- Extraction: Use `@cocoindex.op.function(cache=True)` to wrap BAML calls with caching
 
 **Acceptance Criteria**:
 - CocoIndex flow definition using `@cocoindex.flow_def()` decorator
-- BAML extraction wrapped with `@cocoindex.op.function(cache=True)` for caching
-- Native PDF support using `baml_py.Pdf.from_base64()` (NOT image type)
+- PDF→Images conversion via `@cocoindex.op.function()` with pdf2image
+- ColPali embeddings via `cocoindex.functions.ColPaliEmbedImage(model="vidore/colqwen2-v0.1")`
 - Qdrant export using `cocoindex.targets.Qdrant(collection_name=...)`
-- Text embedding using `cocoindex.functions.SentenceTransformerEmbed()`
-- Query handler for semantic search with `@flow.query_handler()`
-- Collectors for gathering extracted data with metadata
+- Query handler using `cocoindex.functions.ColPaliEmbedQuery()` for text queries
+- BAML schema enforcement via tatforge's BAMLFunctionGenerator (post-retrieval)
 
-**Technical Implementation** (based on official examples):
+**Technical Implementation** (based on multi_format_indexing example):
 ```python
-import base64
 import cocoindex
-import baml_py
-from baml_client import b
+import mimetypes
+from dataclasses import dataclass
+from io import BytesIO
+from pdf2image import convert_from_bytes
 
-@cocoindex.op.function(cache=True, behavior_version=1)
-async def extract_document_data(content: bytes) -> ExtractedData:
-    """Extract structured data from PDF using BAML's native PDF support."""
-    pdf = baml_py.Pdf.from_base64(base64.b64encode(content).decode("utf-8"))
-    return await b.ExtractFromPDF(document=pdf)
+from tatforge.core.baml_function_generator import BAMLFunctionGenerator
 
-@cocoindex.transform_flow()
-def text_to_embedding(text: cocoindex.DataSlice[str]) -> cocoindex.DataSlice[list[float]]:
-    """Shared embedding logic for indexing and querying."""
-    return text.transform(
-        cocoindex.functions.SentenceTransformerEmbed(
-            model="sentence-transformers/all-MiniLM-L6-v2"
-        )
-    )
+COLPALI_MODEL = "vidore/colqwen2-v0.1"
 
-@cocoindex.flow_def(name="DocumentExtractionFlow")
-def document_extraction_flow(
+@dataclass
+class Page:
+    page_number: int | None
+    image: bytes
+
+@cocoindex.op.function()
+def file_to_pages(filename: str, content: bytes) -> list[Page]:
+    """Convert PDF/images to page images for ColPali embedding."""
+    mime_type, _ = mimetypes.guess_type(filename)
+    if mime_type == "application/pdf":
+        images = convert_from_bytes(content, dpi=300)
+        pages = []
+        for i, image in enumerate(images):
+            with BytesIO() as buffer:
+                image.save(buffer, format="PNG")
+                pages.append(Page(page_number=i + 1, image=buffer.getvalue()))
+        return pages
+    elif mime_type and mime_type.startswith("image/"):
+        return [Page(page_number=None, image=content)]
+    return []
+
+@cocoindex.flow_def(name="DocumentIndexingFlow")
+def document_indexing_flow(
     flow_builder: cocoindex.FlowBuilder,
     data_scope: cocoindex.DataScope
 ) -> None:
-    # Load documents as binary (required for PDFs)
+    """Index documents with ColPali embeddings in Qdrant."""
     data_scope["documents"] = flow_builder.add_source(
         cocoindex.sources.LocalFile(path="pdfs", binary=True)
     )
-
-    doc_embeddings = data_scope.add_collector()
+    output_embeddings = data_scope.add_collector()
 
     with data_scope["documents"].row() as doc:
-        doc["extracted"] = doc["content"].transform(extract_document_data)
-        doc["embedding"] = text_to_embedding(doc["extracted"])
-
-        doc_embeddings.collect(
-            id=cocoindex.GeneratedField.UUID,
-            filename=doc["filename"],
-            extracted_data=doc["extracted"],
-            text_embedding=doc["embedding"],
+        doc["pages"] = flow_builder.transform(
+            file_to_pages, filename=doc["filename"], content=doc["content"]
         )
+        with doc["pages"].row() as page:
+            # ColPali generates multi-vector embeddings for spatial awareness
+            page["embedding"] = page["image"].transform(
+                cocoindex.functions.ColPaliEmbedImage(model=COLPALI_MODEL)
+            )
+            output_embeddings.collect(
+                id=cocoindex.GeneratedField.UUID,
+                filename=doc["filename"],
+                page=page["page_number"],
+                embedding=page["embedding"],
+            )
 
-    doc_embeddings.export(
-        "doc_embeddings",
-        cocoindex.targets.Qdrant(collection_name="documents"),
+    output_embeddings.export(
+        "document_embeddings",
+        cocoindex.targets.Qdrant(collection_name="DocumentEmbeddings"),
         primary_key_fields=["id"],
     )
+
+@cocoindex.transform_flow()
+def query_to_colpali_embedding(text: cocoindex.DataSlice[str]) -> cocoindex.DataSlice[list[list[float]]]:
+    """Convert text query to ColPali multi-vector embedding for search."""
+    return text.transform(cocoindex.functions.ColPaliEmbedQuery(model=COLPALI_MODEL))
+
+# FLOW 2: BAML Extraction (cached, async - like patient_intake_extraction_baml)
+@cocoindex.op.function(cache=True, behavior_version=1)
+async def extract_structured_data(page_image: bytes, baml_function_name: str) -> dict:
+    """
+    Extract structured data from a page image using BAML.
+    Uses tatforge's BAMLFunctionGenerator for schema-driven extraction.
+    Caching prevents redundant LLM calls for the same page.
+    """
+    from tatforge.core.baml_function_generator import BAMLFunctionGenerator
+    from baml_client import b
+    import base64
+    import baml_py
+
+    # Convert image to base64 for BAML
+    image_b64 = base64.b64encode(page_image).decode("utf-8")
+    image = baml_py.Image.from_base64("image/png", image_b64)
+
+    # Use dynamically generated BAML function via tatforge
+    result = await getattr(b, baml_function_name)(document_images=[image])
+    return result.model_dump() if hasattr(result, 'model_dump') else result
 ```
 
 **Definition of Done**:
-- [ ] CocoIndex flow file created (`cocoindex_flow.py`)
-- [ ] BAML extraction uses native PDF type (not image)
-- [ ] Qdrant export configured via CocoIndex
-- [ ] Query handler implemented for semantic search
+- [ ] CocoIndex flow integrated into tatforge/core/pipeline.py
+- [ ] PDF→Images via pdf2image at 300 DPI
+- [ ] ColPali embeddings via cocoindex.functions.ColPaliEmbedImage
+- [ ] Qdrant export via cocoindex.targets.Qdrant
+- [ ] Query handler with ColPaliEmbedQuery for semantic search
+- [ ] Integration with tatforge's BAMLFunctionGenerator for post-retrieval extraction
 - [ ] Integration tested with test PDFs
-- [ ] Notebook updated to use CocoIndex flow
 
 ---
 
