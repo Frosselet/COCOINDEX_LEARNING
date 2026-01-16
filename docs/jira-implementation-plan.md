@@ -2365,9 +2365,9 @@ dependencies = [
 ```
 
 **Definition of Done**:
-- [ ] cocoindex added to pyproject.toml
-- [ ] `uv pip install -e .` succeeds
-- [ ] `import cocoindex` works
+- [x] cocoindex added to pyproject.toml ✅
+- [x] `uv pip install -e .` succeeds ✅
+- [x] `import cocoindex` works ✅
 
 ---
 
@@ -2414,9 +2414,9 @@ async def extract_with_baml(page_image: bytes, schema_json: dict) -> dict:
 ```
 
 **Definition of Done**:
-- [ ] All files created with module-level definitions
-- [ ] Imports work without errors
-- [ ] Decorators applied at module level (not inside functions)
+- [x] All files created with module-level definitions ✅
+- [x] Imports work without errors ✅
+- [x] Decorators applied at module level (not inside functions) ✅
 
 ---
 
@@ -2452,9 +2452,9 @@ if __name__ == "__main__":
 ```
 
 **Definition of Done**:
-- [ ] `python main.py` runs interactive search
-- [ ] `cocoindex setup` creates Qdrant collection
-- [ ] `cocoindex update` indexes all PDFs
+- [x] `python main.py` runs interactive search ✅
+- [ ] `cocoindex setup` creates Qdrant collection (requires testing)
+- [ ] `cocoindex update` indexes all PDFs (requires testing)
 
 ---
 
@@ -2473,9 +2473,9 @@ if __name__ == "__main__":
 - Keep `VisionExtractionPipeline` as utility class
 
 **Definition of Done**:
-- [ ] CocoIndex code removed from pipeline.py
-- [ ] VisionExtractionPipeline still works for programmatic use
-- [ ] No duplicate code between pipeline.py and flows/
+- [x] CocoIndex code removed from pipeline.py ✅
+- [x] VisionExtractionPipeline still works for programmatic use ✅
+- [x] No duplicate code between pipeline.py and flows/ ✅
 
 ---
 
@@ -2495,9 +2495,9 @@ def cmd_cocoindex(args):
 ```
 
 **Definition of Done**:
-- [ ] `tatforge cocoindex setup` works
-- [ ] `tatforge cocoindex update` indexes documents
-- [ ] No broken pipeline instantiation in CLI
+- [x] `tatforge cocoindex setup` command added ✅
+- [x] `tatforge cocoindex update` command added ✅
+- [x] No broken pipeline instantiation in CLI ✅
 
 ---
 
