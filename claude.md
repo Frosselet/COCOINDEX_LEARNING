@@ -48,7 +48,7 @@ This document establishes the development workflow and rules for the ColPali-BAM
 
 - **Completed Stories**:
   - COLPALI-100 (Core Infrastructure & Docker Foundation) ✅
-  - COLPALI-200 (Document Processing Pipeline) ✅ - Including COLPALI-204 CocoIndex Integration
+  - COLPALI-200 (Document Processing Pipeline) ✅
   - COLPALI-300 (ColPali Vision Integration) ✅
   - COLPALI-400 (Qdrant Vector Storage Integration) ✅
   - COLPALI-500 (BAML Schema System) ✅
@@ -59,10 +59,11 @@ This document establishes the development workflow and rules for the ColPali-BAM
   - COLPALI-1000 (Testing & Validation) ✅
   - COLPALI-1100 (Documentation & Operations) ✅
   - COLPALI-1200 (tatForge Package Distribution) ✅
-- **Project Status**: All 12 Stories Complete
+  - COLPALI-1300 (CocoIndex Orchestration Refactor) ✅
+- **Project Status**: All 13 Stories Complete
 - **Current Branch**: `main`
-- **Total Implementation**: 189 story points (12 stories)
-- **CocoIndex Integration**: Complete - tatforge/core/pipeline.py contains ColPali+Qdrant flows
+- **Total Implementation**: 202 story points (13 stories)
+- **CocoIndex Integration**: Complete - tatforge/flows/ module with module-level definitions
 
 ### Story Progress Tracking
 
