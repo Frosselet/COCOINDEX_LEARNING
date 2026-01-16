@@ -58,7 +58,7 @@ dependencies = [
     "psutil>=5.9.0",
     "pandas>=2.0.0",
     "jsonschema>=4.0.0",
-    "cocoindex>=0.1.0",
+    "cocoindex[colpali]>=0.1.0",
     "python-dotenv>=1.0.0",
 ]
 

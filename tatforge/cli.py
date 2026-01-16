@@ -321,15 +321,33 @@ def cmd_cocoindex(args: argparse.Namespace) -> int:
                 print("Tip: Run 'tatforge cocoindex update' to index documents first.")
             return 0
 
-        else:
-            # Delegate to cocoindex CLI for setup, update, server
-            print(f"\nRunning: cocoindex {args.action}")
+        elif args.action == "setup":
+            # Setup all flows (create collections, etc.)
+            print("\nRunning: cocoindex setup")
             print("-" * 40)
-            # CocoIndex CLI handles the rest
-            import sys
-            sys.argv = ["cocoindex", args.action]
-            cocoindex.cli_main()
+            cocoindex.setup_all_flows()
+            print("\n✅ Setup complete!")
             return 0
+
+        elif args.action == "update":
+            # Update all flows (index documents)
+            print("\nRunning: cocoindex update")
+            print("-" * 40)
+            import asyncio
+            asyncio.run(cocoindex.update_all_flows_async())
+            print("\n✅ Update complete!")
+            return 0
+
+        elif args.action == "server":
+            # Start CocoIndex server
+            print("\nStarting CocoIndex server...")
+            print("-" * 40)
+            cocoindex.start_server()
+            return 0
+
+        else:
+            logger.error(f"Unknown action: {args.action}")
+            return 1
 
     except ImportError as e:
         logger.error(f"Missing dependency: {e}")
