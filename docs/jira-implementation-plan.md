@@ -2310,6 +2310,197 @@ display_result(result)
 
 ---
 
+### Story 13: COLPALI-1300 - CocoIndex Orchestration Refactor
+**Points**: 13
+**Sprint**: 15
+**Priority**: CRITICAL - Architecture Fix
+
+> **🔴 CRITICAL**: This story fixes a fundamental architectural issue where CocoIndex integration code exists but is non-functional. CocoIndex must be the central orchestrator for tatforge, wiring together ColPali embeddings and Qdrant storage following official patterns.
+
+**Description**: Refactor tatforge to properly use CocoIndex as the central orchestrator, following official patterns from:
+- https://github.com/cocoindex-io/cocoindex/tree/main/examples/multi_format_indexing (ColPali + Qdrant)
+- https://github.com/cocoindex-io/cocoindex/tree/main/examples/patient_intake_extraction_baml (BAML extraction)
+
+**Problem Statement**:
+The current CocoIndex integration in `tatforge/core/pipeline.py` is broken:
+1. Flows nested inside `register_cocoindex_flows()` function instead of module level
+2. No `cocoindex.init()` call anywhere
+3. `VisionExtractionPipeline` and CocoIndex flows don't integrate
+4. CLI creates pipeline with missing required dependencies
+5. `cocoindex` not in pyproject.toml dependencies
+
+**Architecture** (correct pattern from examples):
+```
+INDEXING (cocoindex setup/update):
+  pdfs/ → LocalFile → file_to_pages → ColPaliEmbedImage → Qdrant
+
+SEARCH + EXTRACT:
+  Query → ColPaliEmbedQuery → Qdrant Search → Page Images
+        → extract_with_baml (cached) → Structured Output
+```
+
+**Acceptance Criteria**:
+- [ ] CocoIndex flows defined at module level (not nested in functions)
+- [ ] Entry point calls `cocoindex.init()` before flow usage
+- [ ] `cocoindex setup` creates Qdrant collection with proper schema
+- [ ] `cocoindex update` indexes all PDFs with ColPali embeddings
+- [ ] Search query returns relevant documents from Qdrant
+- [ ] BAML extraction works on retrieved pages with caching
+
+#### Tasks:
+
+#### COLPALI-1301: Add cocoindex to pyproject.toml [1 pt]
+**Assignee**: Backend Engineer
+**Sprint**: 15
+**Dependencies**: None
+
+**Description**: Add cocoindex as a project dependency in pyproject.toml.
+
+**Technical Implementation**:
+```toml
+dependencies = [
+    # ... existing ...
+    "cocoindex>=0.1.0",
+]
+```
+
+**Definition of Done**:
+- [ ] cocoindex added to pyproject.toml
+- [ ] `uv pip install -e .` succeeds
+- [ ] `import cocoindex` works
+
+---
+
+#### COLPALI-1302: Create tatforge/flows module [5 pts]
+**Assignee**: Backend Engineer (Lead)
+**Sprint**: 15
+**Dependencies**: COLPALI-1301
+
+**Description**: Create new `tatforge/flows/` module with module-level CocoIndex definitions following official patterns.
+
+**New Files**:
+- `tatforge/flows/__init__.py` - Flow exports
+- `tatforge/flows/ops.py` - `@cocoindex.op.function()` operations
+- `tatforge/flows/indexing.py` - `@cocoindex.flow_def()` and `@cocoindex.transform_flow()`
+- `tatforge/flows/extraction.py` - `@cocoindex.op.function(cache=True)` for BAML
+
+**Technical Implementation**:
+
+**ops.py** (module-level):
+```python
+@cocoindex.op.function()
+def file_to_pages(filename: str, content: bytes) -> list[Page]:
+    # PDF → 300 DPI images using pdf2image
+```
+
+**indexing.py** (module-level):
+```python
+qdrant_connection = cocoindex.add_auth_entry(...)  # MODULE LEVEL
+
+@cocoindex.flow_def(name="DocumentIndexingFlow")
+def document_indexing_flow(flow_builder, data_scope) -> None:
+    # LocalFile → file_to_pages → ColPaliEmbedImage → Qdrant
+
+@cocoindex.transform_flow()
+def query_to_colpali_embedding(text):
+    return text.transform(cocoindex.functions.ColPaliEmbedQuery(...))
+```
+
+**extraction.py** (module-level):
+```python
+@cocoindex.op.function(cache=True, behavior_version=1)
+async def extract_with_baml(page_image: bytes, schema_json: dict) -> dict:
+    # Uses tatforge's BAMLFunctionGenerator
+```
+
+**Definition of Done**:
+- [ ] All files created with module-level definitions
+- [ ] Imports work without errors
+- [ ] Decorators applied at module level (not inside functions)
+
+---
+
+#### COLPALI-1303: Create main.py entry point [3 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 15
+**Dependencies**: COLPALI-1302
+
+**Description**: Create project-level entry point that initializes CocoIndex and provides interactive search.
+
+**New File**: `main.py` at project root
+
+**Technical Implementation**:
+```python
+from dotenv import load_dotenv
+import cocoindex
+
+# Import flows (registers them at import time)
+from tatforge.flows import (
+    document_indexing_flow,
+    query_to_colpali_embedding,
+    extract_with_baml,
+)
+
+def search_documents(query: str, limit: int = 5) -> list:
+    query_embedding = query_to_colpali_embedding.eval(query)
+    # Search Qdrant...
+
+if __name__ == "__main__":
+    load_dotenv()
+    cocoindex.init()  # REQUIRED before using flows
+    _main()
+```
+
+**Definition of Done**:
+- [ ] `python main.py` runs interactive search
+- [ ] `cocoindex setup` creates Qdrant collection
+- [ ] `cocoindex update` indexes all PDFs
+
+---
+
+#### COLPALI-1304: Clean up tatforge/core/pipeline.py [2 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 15
+**Dependencies**: COLPALI-1302
+
+**Description**: Remove broken CocoIndex section from pipeline.py. The CocoIndex integration has been moved to `tatforge/flows/`.
+
+**Technical Implementation**:
+- Remove lines 531-800 (broken CocoIndex section)
+- Delete `register_cocoindex_flows()` function
+- Delete nested flow definitions
+- Delete `search_documents()` helper
+- Keep `VisionExtractionPipeline` as utility class
+
+**Definition of Done**:
+- [ ] CocoIndex code removed from pipeline.py
+- [ ] VisionExtractionPipeline still works for programmatic use
+- [ ] No duplicate code between pipeline.py and flows/
+
+---
+
+#### COLPALI-1305: Update tatforge CLI [2 pts]
+**Assignee**: Backend Engineer
+**Sprint**: 15
+**Dependencies**: COLPALI-1303
+
+**Description**: Add CocoIndex command to tatforge CLI and fix broken pipeline instantiation.
+
+**Technical Implementation**:
+```python
+def cmd_cocoindex(args):
+    cocoindex.init()
+    from tatforge.flows import document_indexing_flow
+    cocoindex.cli_main()
+```
+
+**Definition of Done**:
+- [ ] `tatforge cocoindex setup` works
+- [ ] `tatforge cocoindex update` indexes documents
+- [ ] No broken pipeline instantiation in CLI
+
+---
+
 ## Updated Project Summary
 
 ### Timeline and Milestones
@@ -2321,8 +2512,11 @@ display_result(result)
 - Sprint 9-10: Output Management & Governance (Stories 7-8)
 - Sprint 11-12: Deployment & Validation (Stories 9-11)
 
-**Phase 2: Package Distribution (New)**
+**Phase 2: Package Distribution (Completed)**
 - Sprint 13-14: tatForge Package (Story 12)
+
+**Phase 3: Architecture Fix (Critical)**
+- Sprint 15: CocoIndex Orchestration (Story 13)
 
 ### Updated Story Point Summary
 
@@ -2339,8 +2533,9 @@ display_result(result)
 | COLPALI-900 | Lambda Deployment | 21 | ✅ Complete |
 | COLPALI-1000 | Testing | 13 | ✅ Complete |
 | COLPALI-1100 | Documentation | 8 | ✅ Complete |
-| **COLPALI-1200** | **tatForge Package** | **21** | 🆕 New |
-| **Total** | | **189** | |
+| COLPALI-1200 | tatForge Package | 21 | ✅ Complete |
+| **COLPALI-1300** | **CocoIndex Orchestration** | **13** | 🔴 Critical |
+| **Total** | | **202** | |
 
 ---
 
